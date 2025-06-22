@@ -26,5 +26,6 @@ issues = "https://github.com/ryanjjung/microsite/issues"
 
 [project.optional-dependencies]
 dev = [
+    "bpython",
     "ruff>=0.12,<1"
 ]

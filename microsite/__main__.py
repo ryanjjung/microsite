@@ -5,7 +5,6 @@ Main entrypoint to the microsite command line utility. Also contains code common
 import logging
 
 from argparse import ArgumentParser
-# from pathlib import Path
 
 
 def parse_args():
@@ -38,10 +37,18 @@ def parse_args():
 def setup_logging(verbose: bool = False):
     """
     Configure the logging facility this program will use.
+
+    :param verbose: When True, extra detail is produced in the logs. Defaults to False.
+    :type verbose: bool, optional
     """
 
     log = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO, format='[%(asctime)s] %(module)s %(message)s')
+
+    log_format = '[%(asctime)s] [%(levelname)s] [%(filename)s] %(message)s' if verbose else '%(message)s'
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.INFO,
+        format=log_format,
+    )
     log.info('Logging configured.')
     log.debug('Log verbosity enabled.')
 
@@ -50,6 +57,14 @@ def main():
     args = parse_args()
     setup_logging(verbose=args.verbose)
     logging.debug(f'Program started with args: {args}')
+    logging.debug(f'Running in {args.runmode} mode')
+
+    if args.runmode == 'render':
+        from microsite.render import render
+
+        render(args.source, args.target)
+    if args.runmode == 'publish':
+        logging.info('Not yet implemented!')
 
 
 if __name__ == '__main__':

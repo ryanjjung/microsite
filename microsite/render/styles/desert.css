@@ -1,0 +1,71 @@
+body {
+  font-family: 'Droid Sans', sans-serif;
+  background-color: #fff2c7;
+  color: #5e4c10;
+}
+
+div.content {
+  max-width: 800px;
+  margin: auto;
+  padding: 10px;
+}
+
+table, th, tr, td {
+  border: 1px #735e1a solid;
+  border-spacing: 0;
+  margin: auto;
+  text-align: center;
+  padding: 0px;
+}
+
+td, th {
+  padding: 4px;
+  border: none;
+  border-left: 1px#735e1a solid;
+  border-top: 1px#735e1a solid;
+}
+
+.centered {
+  text-align: center;
+}
+
+img {
+  max-width: 700px;
+  margin: auto;
+  border: 1px solid #735e1a;
+  border-radius: 16px;
+}
+
+blockquote {
+  border-left: 4px solid #5e4c10;
+  padding-left: 6px;
+}
+
+a:link {
+  color: #df8d00;
+}
+
+a:visited {
+  color: #d3a500;
+}
+
+a:hover {
+  color: #974b00;
+}
+
+a:active {
+  color: #974b00;
+}
+
+pre {
+  margin-left: 40px;
+  margin-right: 40px;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #c8aa79;
+  color: #5e4c10;
+  font-size: larger;
+  font-family: 'Droid Sans Mono'
+}
