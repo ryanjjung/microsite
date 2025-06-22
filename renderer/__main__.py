@@ -1,7 +1,7 @@
 """
-This program accepts (among other things) a directory containing static assets (such as images, fonts, etc.) and
-Markdown text files. It produces a directory containing that content rendered as a static webpage which can be uploaded
-to any file host.
+This program accepts a source directory containing static assets (such as images, fonts, etc.) and Markdown text files.
+It produces a target directory containing that content rendered as a static webpage which can be uploaded to any file
+host.
 """
 
 import logging
@@ -15,7 +15,7 @@ def parse_args():
     """
 
     parser = ArgumentParser(
-        prog='python -m markdown-publisher', description='Renders a directory containing Markdown files into an HTML website.'
+        prog='python -m renderer', description='Renders a directory containing Markdown files into an HTML website.'
     )
     parser.add_argument('source', help='Directory where the source content can be found.')
     parser.add_argument('target', help='Directory where the output should be created.')
