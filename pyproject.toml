@@ -1,0 +1,30 @@
+[project]
+name = "microsite"
+description = "Tools to make the small web accessible"
+version = "0.0.1"
+readme = "README.md"
+authors = [
+    {name="Ryan Jung", email="ryanjjung@gmail.com"}
+]
+keywords = ["smallweb", "website", "publishing"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+requires-python = ">=3.13"
+dependencies = [
+    "Markdown>=3.8.2"
+]
+
+[project.urls]
+repository = "https://github.com/ryanjjung/microsite"
+issues = "https://github.com/ryanjjung/microsite/issues"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.12,<1"
+]
