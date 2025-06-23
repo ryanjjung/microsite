@@ -30,20 +30,25 @@ def parse_args():
     sub_publish = subparsers.add_parser('publish', help='Publish static content to an online target.')
     sub_publish.add_argument('source', help='Directory containing the pre-rendered content to publish.')
     sub_publish.add_argument('target', help='URI describing the publication target.')
-    sub_publish.add_argument(
+
+    # Subparser for the rendering step
+    sub_render = subparsers.add_parser('render', help='Render Markdown documents into HTML files.')
+    sub_render.add_argument('source', help='Directory where the source content can be found.')
+    sub_render.add_argument('target', help='Directory where the output should be created.')
+    sub_render.add_argument(
         '-d',
         '--delete-target-dir',
         help='Delete the target directory before rendering the source.',
         default=False,
         action='store_true',
     )
-    sub_publish.add_argument(
+    sub_render.add_argument(
         '-s',
         '--stylesheet',
         help='Path to stylesheet to package with your site.',
         default='microsite/render/styles/plain-white.css',
     )
-    sub_publish.add_argument(
+    sub_render.add_argument(
         '--stylesheet-target-name',
         help=(
             'The filename to install the stylesheet to. Use when there is a filename conflict between your source and'
@@ -51,25 +56,19 @@ def parse_args():
         ),
         default=None,
     )
-    sub_publish.add_argument(
+    sub_render.add_argument(
         '-t',
         '--template',
         help='Path to the Jinja2 template to render Markdown files into.',
         default='microsite/render/templates/default.html.j2',
     )
-    sub_publish.add_argument(
+    sub_render.add_argument(
         '-x',
         '--extension',
         help=f'Enable a Markdown extension; see {MARKDOWN_EXTENSION_DOCS_URL}',
         action='append',
         dest='extensions',
     )
-    sub_publish.add_argument
-
-    # Subparser for the rendering step
-    sub_render = subparsers.add_parser('render', help='Render Markdown documents into HTML files.')
-    sub_render.add_argument('source', help='Directory where the source content can be found.')
-    sub_render.add_argument('target', help='Directory where the output should be created.')
 
     return parser.parse_args()
 
@@ -108,7 +107,7 @@ def main():
             stylesheet=args.stylesheet,
             template=args.template,
             delete_target_dir=args.delete_target_dir,
-            markdown_extensions=args.extensions,
+            markdown_extensions=args.extensions if args.extensions else [],
             stylesheet_target_name=args.stylesheet_target_name,
         )
     if args.runmode == 'publish':
