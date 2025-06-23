@@ -1,5 +1,5 @@
 """
-Main entrypoint to the microsite command line utility. Also contains code common to all modules.
+Main entrypoint to the microsite command line utility.
 """
 
 import logging
