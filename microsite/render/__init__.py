@@ -5,14 +5,26 @@ host.
 """
 
 import logging
+import shutil
 
+from jinja2 import Template
+from markdown import markdown
 from microsite import path as ms_path
 from pathlib import Path
 
 
 log = logging.getLogger(__name__)
 
-def render(source_dir: str, target_dir: Path):
+
+def render_dir(
+    source_dir: str,
+    target_dir: str,
+    stylesheet: str,
+    template: str,
+    delete_target_dir: bool = False,
+    markdown_extensions: list[str] = [],
+    stylesheet_target_name: str = None,
+):
     """
     Discover all files contained within ``source_dir``. Render any Markdown files into HTML files stored in the
     ``target_dir``. Copy any other files directly over.
@@ -23,16 +35,82 @@ def render(source_dir: str, target_dir: Path):
     :param target_dir: Path to the top level directory to render output into.
     :type target_dir: Path
     """
-    
+
+    target_path = Path(target_dir)
+    if target_path.exists() and delete_target_dir:
+        log.info(f'Clearing out target directory {target_dir}')
+        target_path.rmdir()
+        target_path.mkdir()
+    else:
+        raise IOError(f'Target directory {target_dir} already exists.')
+
     log.debug(f'Rendering the contents of {source_dir} into {target_dir}')
     ms_path.validate_dir(source_dir)
     source_files = ms_path.get_all_paths(source_dir=source_dir)
     log.debug('Found the following files:')
     for file in source_files:
         log.debug(str(file))
+
+    # Copy in the stylesheet; detect potential filename conflicts
+    if not stylesheet_target_name:
+        stylesheet_target_name = 'style.css'
+    if stylesheet_target_name in source_files:
+        raise ValueError(
+            f'The stylesheet\'s filename ({stylesheet_target_name}) conflicts with a filename in the source content. '
+            'Specify an alternate stylesheet target name.'
+        )
+    shutil.copy(stylesheet, f'{target_dir}/{stylesheet_target_name}')
+
+    # Do something with each source file
+    for file in source_files:
+        if Path(file).is_file():
+            # Ensure the target containing directory exists
+            target_subdir = Path('/'.join(f'{target_dir}/{file}'.split('/')[:-1]))
+            target_subdir.mkdir(exist_ok=True, parents=True)
+
+            if file.endswith('.md'):
+                # Replace .md extension with .html
+                file_parts = file.split('.')
+                file_parts[-1] = 'html'
+                target_filename = '.'.join(file_parts)
+                render_markdown_file(
+                    source_file=file,
+                    target_file=f'{target_dir}/{target_filename}',
+                    stylesheet=stylesheet,
+                    template_file=template,
+                    markdown_extensions=markdown_extensions,
+                )
+            else:
+                # Copy the file directly
+                shutil.copy(f'{source_dir}/{file}', f'{target_dir}/{file}')
+
+
+def render_markdown_file(
+    source_file: str, target_file: str, stylesheet: str, template_file: str, markdown_extensions: list[str] = []
+):
+    # Path-ify some things
+    source = Path(source_file)
+    target = Path(target_file)
+    template = Path(template_file)
+
+    # Convert the Markdown to HTML (but this is only a snippet, not a full proper document)
+    html = ''
+    if not source.is_file():
+        raise ValueError(f'Source file {source_file} is not a normal file.')
+    with source.open('r') as file:
+        log.debug(f'Rendering Markdown from source {source} into HTML')
+        html = markdown(file.read(), extensions=markdown_extensions)
     
-    # Detect Markdown files by file extension
-    markdown_files = [ file for file in source_files if str(file).endswith('.md') ]
-    log.debug('Found the following Markdown files:')
-    for file in markdown_files:
-        log.debug(str(file))
+    # Pipe that HTML into a Jinja template with other rendering details
+    template = None
+    with template.open('r') as file:
+        log.debug(f'Rendering template {template_file} for source {source}')
+        template = Template(source=template_file)
+        dots = '../' * (len(source_file.split('/')) - 2)
+        relative_stylesheet = f'{dots}{stylesheet}'
+        html = template.render(stylesheet=relative_stylesheet, title='TODO!', html=html)
+    
+    # Write out the content to the target
+    with target.open('w') as file:
+        log.debug(f'Writing target file {target}')
+        file.write(html)

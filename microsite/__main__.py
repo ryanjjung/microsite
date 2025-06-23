@@ -7,6 +7,11 @@ import logging
 from argparse import ArgumentParser
 
 
+MARKDOWN_EXTENSION_DOCS_URL = (
+    'https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions'
+)
+
+
 def parse_args():
     """
     Parse the command line arguments this program has been initiated with.
@@ -25,6 +30,41 @@ def parse_args():
     sub_publish = subparsers.add_parser('publish', help='Publish static content to an online target.')
     sub_publish.add_argument('source', help='Directory containing the pre-rendered content to publish.')
     sub_publish.add_argument('target', help='URI describing the publication target.')
+    sub_publish.add_argument(
+        '-d',
+        '--delete-target-dir',
+        help='Delete the target directory before rendering the source.',
+        default=False,
+        action='store_true',
+    )
+    sub_publish.add_argument(
+        '-s',
+        '--stylesheet',
+        help='Path to stylesheet to package with your site.',
+        default='microsite/render/styles/plain-white.css',
+    )
+    sub_publish.add_argument(
+        '--stylesheet-target-name',
+        help=(
+            'The filename to install the stylesheet to. Use when there is a filename conflict between your source and'
+            'the destination for the stylesheet in your rendered output.'
+        ),
+        default=None,
+    )
+    sub_publish.add_argument(
+        '-t',
+        '--template',
+        help='Path to the Jinja2 template to render Markdown files into.',
+        default='microsite/render/templates/default.html.j2',
+    )
+    sub_publish.add_argument(
+        '-x',
+        '--extension',
+        help=f'Enable a Markdown extension; see {MARKDOWN_EXTENSION_DOCS_URL}',
+        action='append',
+        dest='extensions',
+    )
+    sub_publish.add_argument
 
     # Subparser for the rendering step
     sub_render = subparsers.add_parser('render', help='Render Markdown documents into HTML files.')
@@ -60,9 +100,17 @@ def main():
     logging.debug(f'Running in {args.runmode} mode')
 
     if args.runmode == 'render':
-        from microsite.render import render
+        from microsite.render import render_dir
 
-        render(args.source, args.target)
+        render_dir(
+            source_dir=args.source,
+            target_dir=args.target,
+            stylesheet=args.stylesheet,
+            template=args.template,
+            delete_target_dir=args.delete_target_dir,
+            markdown_extensions=args.extensions,
+            stylesheet_target_name=args.stylesheet_target_name,
+        )
     if args.runmode == 'publish':
         logging.info('Not yet implemented!')
 
