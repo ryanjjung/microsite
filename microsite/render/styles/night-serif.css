@@ -1,0 +1,80 @@
+body {
+  font-family: "C059", serif;
+  background-color: #222;
+  color: #ddd;
+  line-height: 150%;
+}
+
+div.content {
+  max-width: 500px;
+  margin: auto;
+  padding: 10px;
+}
+
+h1 {
+  color: #70cfff;
+}
+
+h2, h3 {
+  color: #9cdeff;
+}
+
+table, th, tr, td {
+  border: 1px #aaa solid;
+  border-spacing: 0;
+  margin: auto;
+  text-align: center;
+  padding: 0px;
+}
+
+td, th {
+  padding: 4px;
+  border: none;
+  border-left: 1px#888 solid;
+  border-top: 1px#888 solid;
+}
+
+.centered {
+  text-align: center;
+}
+
+img {
+  max-width: 700px;
+  margin: auto;
+  border: 1px solid #000;
+  border-radius: 8px;
+}
+
+blockquote {
+  border-left: 4px solid #70cfff;
+  padding-left: 6px;
+}
+
+a:link {
+  color: #70cfff;
+}
+
+a:visited {
+  color: #ea70ff;
+}
+
+a:hover {
+  color: #a3e0ff;
+}
+
+a:active {
+  color: #a3e0ff;
+}
+
+pre {
+  margin-left: 40px;
+  margin-right: 40px;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #000;
+  color: #ccc;
+  font-size: larger;
+  font-family: 'Droid Sans Mono'
+}
