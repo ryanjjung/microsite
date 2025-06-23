@@ -32,7 +32,7 @@ def get_all_paths(source_dir: str | Path, top_dir: str = None) -> list[str]:
     # Then expand on each subdirectory recursively
     for path in [path for path in source_dir.iterdir() if path.is_dir()]:
         all_paths.extend(get_all_paths(path, top_dir=top_dir))
-    
+
     # Convert each path to a string and remove the common top path
     return [str(path).replace(f'{str(top_dir)}/', '') for path in all_paths]
 

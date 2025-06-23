@@ -1,7 +1,5 @@
 """
-This program accepts a source directory containing static assets (such as images, fonts, etc.) and Markdown text files.
-It produces a target directory containing that content rendered as a static webpage which can be uploaded to any file
-host.
+Module for rendering HTML files from source Markdown files.
 """
 
 import jinja2
@@ -24,17 +22,48 @@ def render_dir(
     template: str,
     delete_target_dir: bool = False,
     markdown_extensions: list[str] = [],
+    rewrite_md_extensions: bool = False,
     stylesheet_target_name: str = None,
-):
+) -> None:
     """
     Discover all files contained within ``source_dir``. Render any Markdown files into HTML files stored in the
     ``target_dir``. Copy any other files directly over.
 
-    :param source_dir: Path to the top level directory containing the content to render.
+    :param source_dir: The top level directory containing all source files.
     :type source_dir: str
 
-    :param target_dir: Path to the top level directory to render output into.
-    :type target_dir: Path
+    :param target_dir: The top level directory where all rendered output will be placed.
+    :type target_dir: str
+
+    :param stylesheet: Path to the file containing the CSS to apply to the site.
+    :type stylesheet: str
+
+    :param template: Path to the Jinja2 template to use when rendering HTML. When rendering, this has access to the
+        "stylesheet" (relative path to the stylesheet to load), "title" (string to display in the tab/title bar), and
+        "html" (the HTML rendered from the Markdown) variables.
+    :type template: str
+
+    :param delete_target_dir: When True, if the target directory exists, delete it before building. Defaults to False.
+    :type delete_target_dir: bool, optional
+
+    :param markdown_extensions: List of Markdown extensions to enable. See
+        https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
+        Enables no extensions by default.
+    :type markdown_extensions: list[str], optional
+
+    :param rewrite_md_extensions: When True, input files with a ``.md`` extension will have the extension changed to
+        ``.html`` in the output. Whether you use this or not depends on how you have written your links in the source
+        code. If you reference your own documents by their ".md" filenames (which is useful in many development
+        scenarios), you should not enable this or your links will break. Defaults to False.
+    :type rewrite_md_extensions: bool, optional
+
+    :param stylesheet_target_name: Defines an alternate filename to store the stylesheet in the output. By default,
+        we use "style.css", but if you already have a file by that name in your sources, it would create a conflict to
+        use that name in the output. Use this option to resolve the conflict.
+    :type stylesheet_target_name: str, optional
+
+    :raises IOError: When the target directory exists, but you have not provided ``delete_target_dir=True``.
+    :raises ValueError: When the stylesheet's target filename conflicts with a filename in the source content.
     """
 
     # Prepare target directory
@@ -74,14 +103,17 @@ def render_dir(
             target_subdir.mkdir(exist_ok=True, parents=True)
 
             if file.endswith('.md'):
-                # Replace .md extension with .html
-                file_parts = file.split('.')
-                file_parts[-1] = 'html'
-                target_filename = '.'.join(file_parts)
+                if rewrite_md_extensions:
+                    # Replace .md extension with .html
+                    file_parts = file.split('.')
+                    file_parts[-1] = 'html'
+                    target_filename = '.'.join(file_parts)
+                else:
+                    target_filename = file
                 render_markdown_file(
                     source_dir=source_dir,
                     source_file=file,
-                    target_file=f'{target_dir}/{target_filename}',
+                    target_file=f'{target_dir}{target_filename}',
                     stylesheet=stylesheet_target_name,
                     markdown_extensions=markdown_extensions,
                 )
@@ -96,7 +128,30 @@ def render_markdown_file(
     target_file: str,
     stylesheet: str,
     markdown_extensions: list[str] = [],
-):
+) -> None:
+    """
+    Renders a single Markdown file as an HTML file.
+
+    :param source_dir: Directory in which the source file can be found. Used for determining relative paths.
+    :type source_dir: str
+
+    :param source_file: File to render, relative to the source_dir.
+    :type source_file: str
+
+    :param target_file: File to output the rendered HTML into.
+    :type target_file: str
+
+    :param stylesheet: Stylesheet file to use.
+    :type stylesheet: str
+
+    :param markdown_extensions: List of Markdown extensions to enable. See
+        https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
+        Enables no extensions by default.
+    :type markdown_extensions: list[str], optional
+
+    :raises ValueError: When the provided source file is something other than an ordinary file.
+    """
+
     # Path-ify some things
     source = Path(f'{source_dir}/{source_file}')
     target = Path(target_file)

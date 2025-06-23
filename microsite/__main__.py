@@ -12,7 +12,7 @@ MARKDOWN_EXTENSION_DOCS_URL = (
 )
 
 
-def parse_args():
+def parse_args() -> None:
     """
     Parse the command line arguments this program has been initiated with.
     """
@@ -39,6 +39,13 @@ def parse_args():
         '-d',
         '--delete-target-dir',
         help='Delete the target directory before rendering the source.',
+        default=False,
+        action='store_true',
+    )
+    sub_render.add_argument(
+        '-r',
+        '--rewrite-md-extensions',
+        help='Rewrite source files with .md extensions as .html files in the output',
         default=False,
         action='store_true',
     )
@@ -73,7 +80,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_logging(verbose: bool = False):
+def setup_logging(verbose: bool = False) -> None:
     """
     Configure the logging facility this program will use.
 
@@ -92,7 +99,11 @@ def setup_logging(verbose: bool = False):
     log.debug('Log verbosity enabled.')
 
 
-def main():
+def main() -> None:
+    """
+    Main entrypoint.
+    """
+
     args = parse_args()
     setup_logging(verbose=args.verbose)
     logging.debug(f'Program started with args: {args}')
@@ -108,6 +119,7 @@ def main():
             template=args.template,
             delete_target_dir=args.delete_target_dir,
             markdown_extensions=args.extensions if args.extensions else [],
+            rewrite_md_extensions=args.rewrite_md_extensions,
             stylesheet_target_name=args.stylesheet_target_name,
         )
     if args.runmode == 'publish':
