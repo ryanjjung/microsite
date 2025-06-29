@@ -5,11 +5,16 @@ Main entrypoint to the microsite command line utility.
 import logging
 
 from argparse import ArgumentParser
+from microsite.render.eng_markdown import MarkdownRenderEngine
 
 
 MARKDOWN_EXTENSION_DOCS_URL = (
     'https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions'
 )
+
+RENDER_ENGINE_CLASS_MAP = {
+    'markdown': MarkdownRenderEngine,
+}
 
 
 def parse_args() -> None:
@@ -43,38 +48,51 @@ def parse_args() -> None:
         action='store_true',
     )
     sub_render.add_argument(
-        '-r',
-        '--rewrite-md-extensions',
-        help='Rewrite source files with .md extensions as .html files in the output',
-        default=False,
+        '-e',
+        '--engine',
+        help='Enable the use of a supported rendering engine.',
+        default=[],
+        action='append',
+        dest='engines',
+        choices=['markdown'],
+    )
+
+    # Markdown Rendering Engine Options
+    sub_render.add_argument(
+        '--eng-markdown-rewrite-md-extensions',
+        help='Rewrite source files with .md extensions as .html files in the output. Requires `--engine=markdown`.',
         action='store_true',
+        default=False,
     )
     sub_render.add_argument(
-        '-s',
-        '--stylesheet',
+        '--eng-markdown-html-template',
+        help='Path to a Jinja2 template that inserts an HTML snippet into a full HTML document.',
+        default='microsite/render/templates/markdown.html.j2',
+    )
+    sub_render.add_argument(
+        '--eng-markdown-template-dir',
+        help='Path to the directory containing templates for the Markdown engine.',
+        default='microsite/render/templates',
+    )
+    sub_render.add_argument(
+        '--eng-markdown-extension',
+        help=f'Enable a Markdown extension; see {MARKDOWN_EXTENSION_DOCS_URL}',
+        action='append',
+        dest='eng_markdown_extensions',
+        default=[],
+    )
+    sub_render.add_argument(
+        '--eng-markdown-stylesheet',
         help='Path to stylesheet to package with your site.',
         default='microsite/render/styles/plain-white.css',
     )
     sub_render.add_argument(
-        '--stylesheet-target-name',
+        '--eng-markdown-stylesheet-target-name',
         help=(
             'The filename to install the stylesheet to. Use when there is a filename conflict between your source and'
             'the destination for the stylesheet in your rendered output.'
         ),
-        default=None,
-    )
-    sub_render.add_argument(
-        '-t',
-        '--template',
-        help='Path to the Jinja2 template to render Markdown files into.',
-        default='microsite/render/templates/default.html.j2',
-    )
-    sub_render.add_argument(
-        '-x',
-        '--extension',
-        help=f'Enable a Markdown extension; see {MARKDOWN_EXTENSION_DOCS_URL}',
-        action='append',
-        dest='extensions',
+        default='style.css',
     )
 
     return parser.parse_args()
@@ -110,17 +128,21 @@ def main() -> None:
     logging.debug(f'Running in {args.runmode} mode')
 
     if args.runmode == 'render':
-        from microsite.render import render_dir
+        from microsite.render import render
 
-        render_dir(
+        render_engines = [
+            RENDER_ENGINE_CLASS_MAP[engine](config={
+                key: value
+                for key, value in vars(args).items() if key.startswith(f'eng_{engine}_')
+            })
+            for engine in args.engines
+        ]
+
+        render(
+            engines=render_engines,
             source_dir=args.source,
             target_dir=args.target,
-            stylesheet=args.stylesheet,
-            template=args.template,
             delete_target_dir=args.delete_target_dir,
-            markdown_extensions=args.extensions if args.extensions else [],
-            rewrite_md_extensions=args.rewrite_md_extensions,
-            stylesheet_target_name=args.stylesheet_target_name,
         )
     if args.runmode == 'publish':
         logging.info('Not yet implemented!')
