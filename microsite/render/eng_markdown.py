@@ -1,0 +1,116 @@
+import jinja2
+import logging
+import shutil
+
+from markdown import markdown
+from microsite.render import RenderEngine
+from pathlib import Path
+
+log = logging.getLogger(__name__)
+
+
+class MarkdownRenderEngine(RenderEngine):
+    def __init__(self, config: dict):
+        super().__init__(engine='markdown', config=config)
+
+        # Normalize the template path and file
+        self.template_dir = Path(self.template_dir)
+        self.html_template = Path(self.html_template)
+        self.template_dir = Path.resolve(self.template_dir)
+        self.html_template = Path.resolve(self.html_template)
+
+    def render(self, source_dir: str, target_dir: str, paths: list[str]) -> list[str]:
+        # Copy in the stylesheet; detect potential filename conflicts
+        if self.stylesheet_target_name in paths:
+            raise ValueError(
+                f"The stylesheet's filename ({self.stylesheet_target_name}) "
+                'conflicts with a filename in the source content. Specify an alternate stylesheet target name.'
+            )
+        shutil.copy(self.stylesheet, f'{target_dir}/{self.stylesheet_target_name}')
+
+        rendered_paths = []
+        # Call on each rendering engine
+        for path in paths:
+            log.debug(f'Inspecting {source_dir}{path}')
+            if Path(f'{source_dir}{path}').is_file():
+                # Ensure the target containing directory exists
+                target_subdir = Path('/'.join(f'{target_dir}/{path}'.split('/')[:-1]))
+                target_subdir.mkdir(exist_ok=True, parents=True)
+
+                if path.endswith('.md'):
+                    if self.rewrite_md_extensions:
+                        # Replace .md extension with .html
+                        file_parts = path.split('.')
+                        file_parts[-1] = 'html'
+                        target_filename = '.'.join(file_parts)
+                    else:
+                        target_filename = path
+                    rendered_paths.append(path)
+                    self.render_markdown_file(
+                        source_dir=source_dir,
+                        source_file=path,
+                        target_file=f'{target_dir}{target_filename}',
+                    )
+        return rendered_paths
+
+    def render_markdown_file(
+        self,
+        source_dir: str,
+        source_file: str,
+        target_file: str,
+    ) -> None:
+        """
+        Renders a single Markdown file as an HTML file.
+
+        :param source_dir: Directory in which the source file can be found. Used for determining relative paths.
+        :type source_dir: str
+
+        :param source_file: File to render, relative to the source_dir.
+        :type source_file: str
+
+        :param target_file: File to output the rendered HTML into.
+        :type target_file: str
+
+        :param stylesheet: Stylesheet file to use.
+        :type stylesheet: str
+
+        :param markdown_extensions: List of Markdown extensions to enable. See
+            https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
+            Enables no extensions by default.
+        :type markdown_extensions: list[str], optional
+
+        :raises ValueError: When the provided source file is something other than an ordinary file.
+        """
+
+        # Path-ify some things
+        source = Path(f'{source_dir}/{source_file}')
+        target = Path(target_file)
+
+        # Ensure the template is correctly relative to the template directory
+        _html_template = str(self.html_template)
+        _template_dir = f'{str(self.template_dir)}/'
+        if _html_template.startswith(_template_dir):
+            _html_template = _html_template.replace(_template_dir, '')
+
+        # Convert the Markdown to HTML (but this is only a snippet, not a full proper document)
+        md_html = ''
+        if not source.is_file():
+            raise ValueError(f'Source file {source_file} is not a normal file.')
+        with source.open('r') as file:
+            log.debug(f'Rendering Markdown from source {source} into HTML')
+            md_html = markdown(file.read(), extensions=self.extensions)
+
+        # Pipe that HTML into a Jinja template with other rendering details
+        log.info(f'Rendering {source_dir}{source_file} to {target_file}')
+        log.debug(f'Rendering template for source {source}')
+        j2_loader = jinja2.FileSystemLoader(searchpath=_template_dir)
+        j2_env = jinja2.Environment(loader=j2_loader)
+        j2_tpl = j2_env.get_template(_html_template)
+        dots = '../' * (len(source_file.split('/')) - 1)
+        relative_stylesheet = f'{dots}{self.stylesheet_target_name}'
+        page_html = j2_tpl.render(stylesheet=relative_stylesheet, title='TODO!', html=md_html)
+
+        # Write out the content to the target
+        with target.open('w') as file:
+            log.debug(f'Writing target file {target}')
+            file.write(page_html)

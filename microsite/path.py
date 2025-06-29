@@ -5,7 +5,7 @@ from pathlib import Path
 log = logging.getLogger(__name__)
 
 
-def get_all_paths(source_dir: str | Path, top_dir: str = None) -> list[str]:
+def get_all_paths(source_dir: str | Path, top_dir: str | Path = None) -> list[str]:
     """
     Returns all paths contained within the source directory. All paths in the returned list of paths are relative to the
     ``top_dir`` set in the initial call to this function. By default (and in basically every real use case), you should
@@ -18,6 +18,10 @@ def get_all_paths(source_dir: str | Path, top_dir: str = None) -> list[str]:
 
     :param source_dir: Path to the directory to list.
     :type source_dir: str | Path
+
+    :param top_dir: Path to the directory containing the source paths. You should generally never change this from the
+        default.
+    :type top_dir: str | Path
     """
 
     # Determine source and top path
