@@ -23,8 +23,8 @@ class MarkdownRenderEngine(RenderEngine):
         # Copy in the stylesheet; detect potential filename conflicts
         if self.stylesheet_target_name in paths:
             raise ValueError(
-                f"The stylesheet's filename ({self.stylesheet_target_name}) conflicts with a filename in the source content. "
-                'Specify an alternate stylesheet target name.'
+                f"The stylesheet's filename ({self.stylesheet_target_name}) "
+                'conflicts with a filename in the source content. Specify an alternate stylesheet target name.'
             )
         shutil.copy(self.stylesheet, f'{target_dir}/{self.stylesheet_target_name}')
 

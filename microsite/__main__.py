@@ -131,10 +131,9 @@ def main() -> None:
         from microsite.render import render
 
         render_engines = [
-            RENDER_ENGINE_CLASS_MAP[engine](config={
-                key: value
-                for key, value in vars(args).items() if key.startswith(f'eng_{engine}_')
-            })
+            RENDER_ENGINE_CLASS_MAP[engine](
+                config={key: value for key, value in vars(args).items() if key.startswith(f'eng_{engine}_')}
+            )
             for engine in args.engines
         ]
 

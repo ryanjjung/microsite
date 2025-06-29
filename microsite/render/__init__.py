@@ -15,16 +15,24 @@ log = logging.getLogger(__name__)
 
 
 class RenderEngine(ABC):
+    """Abstract class representing common features of a rendering engine.
+
+    :param engine: The name of the rendering engine.
+    :type engine: str
+
+    :param config: A dict containing operating parameters for this rendering engines. The names of those parameters must
+        begin with "eng_{engine}". The values will be stored as attributes on that rendering engine without that prefix.
+        For example, a key called "eng_markdown_html_template" will become `self.html_template`.
+    :type config: dict
+    """
+
     def __init__(self, engine: str, config: dict):
         prefix = f'eng_{engine}_'
-        engine_opts = {
-            key.replace(prefix, ''): value
-            for key, value in config.items()
-        }
+        engine_opts = {key.replace(prefix, ''): value for key, value in config.items()}
         for key, value in engine_opts.items():
             setattr(self, key, value)
         log.debug(f'Created rendering engine {engine} with options: {engine_opts}')
-    
+
     @abstractmethod
     def render(self, paths: list[str]) -> bool:
         pass
@@ -37,8 +45,8 @@ def render(
     delete_target_dir: bool = False,
 ) -> None:
     """
-    Discover all files contained within ``source_dir``. Render any Markdown files into HTML files stored in the
-    ``target_dir``. Copy any other files directly over.
+    Discover all files contained within ``source_dir``. Pass all files into each rendering engine. Mark files those
+    engines render and then copy any other files directly over without alteration.
 
     :param source_dir: The top level directory containing all source files.
     :type source_dir: str
@@ -46,32 +54,8 @@ def render(
     :param target_dir: The top level directory where all rendered output will be placed.
     :type target_dir: str
 
-    :param stylesheet: Path to the file containing the CSS to apply to the site.
-    :type stylesheet: str
-
-    # :param template: Path to the Jinja2 template to use when rendering HTML. When rendering, this has access to the
-    #     "stylesheet" (relative path to the stylesheet to load), "title" (string to display in the tab/title bar), and
-    #     "html" (the HTML rendered from the Markdown) variables.
-    # :type template: str
-
     :param delete_target_dir: When True, if the target directory exists, delete it before building. Defaults to False.
     :type delete_target_dir: bool, optional
-
-    # :param markdown_extensions: List of Markdown extensions to enable. See
-    #     https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
-    #     Enables no extensions by default.
-    # :type markdown_extensions: list[str], optional
-
-    # :param rewrite_md_extensions: When True, input files with a ``.md`` extension will have the extension changed to
-    #     ``.html`` in the output. Whether you use this or not depends on how you have written your links in the source
-    #     code. If you reference your own documents by their ".md" filenames (which is useful in many development
-    #     scenarios), you should not enable this or your links will break. Defaults to False.
-    # :type rewrite_md_extensions: bool, optional
-
-    :param stylesheet_target_name: Defines an alternate filename to store the stylesheet in the output. By default,
-        we use "style.css", but if you already have a file by that name in your sources, it would create a conflict to
-        use that name in the output. Use this option to resolve the conflict.
-    :type stylesheet_target_name: str, optional
 
     :raises IOError: When the target directory exists, but you have not provided ``delete_target_dir=True``.
     :raises ValueError: When the stylesheet's target filename conflicts with a filename in the source content.
