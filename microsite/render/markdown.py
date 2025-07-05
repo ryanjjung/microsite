@@ -4,41 +4,67 @@ import shutil
 
 from markdown import markdown
 from microsite.render import RenderEngine
+from microsite.util import AttrDict
 from pathlib import Path
 
 log = logging.getLogger(__name__)
 
 
 class MarkdownRenderEngine(RenderEngine):
-    def __init__(self, config: dict):
-        super().__init__(engine='markdown', config=config)
+    def __init__(self, config: AttrDict):
+        super().__init__(name='markdown', config=config)
 
-        # Normalize the template path and file
-        self.template_dir = Path(self.template_dir)
-        self.html_template = Path(self.html_template)
-        self.template_dir = Path.resolve(self.template_dir)
+        # Convert template path string to proper Path
+        self.html_template = Path(self.config.html_template)
+
+        # Resolve any pathing complications like symlinks into "real" paths
         self.html_template = Path.resolve(self.html_template)
 
     def render(self, source_dir: str, target_dir: str, paths: list[str]) -> list[str]:
+        """
+        Searches the ``paths`` to find Markdown files by filenames ending in ``.md``. Renders the
+        Jinja2 template found at the configured path (``template_dir/html_template``) for each such
+        file, inserting HTML rendered from the source Markdown into the output. Copies the
+        configured ``stylesheet`` into the source directory using the ``stylesheet_target_name`` and
+        inserts a reference to it into each rendered HTML document. The Markdown rendering engine is
+        initialized using the configured list of ``extensions``. A full list of available engines
+        can be found here:
+        https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
+
+        :param source_dir: Top-level directory containing source files to render.
+        :type source_dir: str | Path 
+
+        :param target_dir: Top-level directory to render files into.
+        :type target_dir: str | Path
+
+        :param paths: List of all paths in the source directory to be processed. Not every path in
+            this list will be rendered.
+        :type paths: list[str]
+
+        :return: List of paths this RenderEngine made alterations to.
+        :rtype: list[str]
+        """
+
         # Copy in the stylesheet; detect potential filename conflicts
-        if self.stylesheet_target_name in paths:
+        if self.config.stylesheet_target_name in paths:
             raise ValueError(
-                f"The stylesheet's filename ({self.stylesheet_target_name}) "
-                'conflicts with a filename in the source content. Specify an alternate stylesheet target name.'
+                f"The stylesheet's filename ({self.config.stylesheet_target_name}) "
+                'conflicts with a filename in the source content. '
+                'Specify an alternate stylesheet target name.'
             )
-        shutil.copy(self.stylesheet, f'{target_dir}/{self.stylesheet_target_name}')
+        shutil.copy(self.config.stylesheet, f'{target_dir}/{self.config.stylesheet_target_name}')
 
         rendered_paths = []
-        # Call on each rendering engine
         for path in paths:
             log.debug(f'Inspecting {source_dir}{path}')
             if Path(f'{source_dir}{path}').is_file():
-                # Ensure the target containing directory exists
+                # Ensure the deeper target directory exists
                 target_subdir = Path('/'.join(f'{target_dir}/{path}'.split('/')[:-1]))
                 target_subdir.mkdir(exist_ok=True, parents=True)
 
+                # Render presumed Markdown files
                 if path.endswith('.md'):
-                    if self.rewrite_md_extensions:
+                    if self.config.rewrite_md_extensions:
                         # Replace .md extension with .html
                         file_parts = path.split('.')
                         file_parts[-1] = 'html'
@@ -62,7 +88,8 @@ class MarkdownRenderEngine(RenderEngine):
         """
         Renders a single Markdown file as an HTML file.
 
-        :param source_dir: Directory in which the source file can be found. Used for determining relative paths.
+        :param source_dir: Directory in which the source file can be found. Used for determining
+            relative paths.
         :type source_dir: str
 
         :param source_file: File to render, relative to the source_dir.
@@ -86,11 +113,10 @@ class MarkdownRenderEngine(RenderEngine):
         source = Path(f'{source_dir}/{source_file}')
         target = Path(target_file)
 
-        # Ensure the template is correctly relative to the template directory
+        # Determine the containing directory from the template path; remove path portion of template
         _html_template = str(self.html_template)
-        _template_dir = f'{str(self.template_dir)}/'
-        if _html_template.startswith(_template_dir):
-            _html_template = _html_template.replace(_template_dir, '')
+        _template_dir = '/'.join(_html_template.split('/')[:-1])
+        _html_template = _html_template.split('/')[-1]
 
         # Convert the Markdown to HTML (but this is only a snippet, not a full proper document)
         md_html = ''
@@ -98,7 +124,7 @@ class MarkdownRenderEngine(RenderEngine):
             raise ValueError(f'Source file {source_file} is not a normal file.')
         with source.open('r') as file:
             log.debug(f'Rendering Markdown from source {source} into HTML')
-            md_html = markdown(file.read(), extensions=self.extensions)
+            md_html = markdown(file.read(), extensions=self.config.extensions)
 
         # Pipe that HTML into a Jinja template with other rendering details
         log.info(f'Rendering {source_dir}{source_file} to {target_file}')
@@ -107,7 +133,7 @@ class MarkdownRenderEngine(RenderEngine):
         j2_env = jinja2.Environment(loader=j2_loader)
         j2_tpl = j2_env.get_template(_html_template)
         dots = '../' * (len(source_file.split('/')) - 1)
-        relative_stylesheet = f'{dots}{self.stylesheet_target_name}'
+        relative_stylesheet = f'{dots}{self.config.stylesheet_target_name}'
         page_html = j2_tpl.render(stylesheet=relative_stylesheet, title='TODO!', html=md_html)
 
         # Write out the content to the target

@@ -7,20 +7,22 @@ log = logging.getLogger(__name__)
 
 def get_all_paths(source_dir: str | Path, top_dir: str | Path = None) -> list[str]:
     """
-    Returns all paths contained within the source directory. All paths in the returned list of paths are relative to the
-    ``top_dir`` set in the initial call to this function. By default (and in basically every real use case), you should
-    not specify a ``top_dir``. This causes the ``top_dir`` to be the ``source_dir`` and all returned paths to be
-    relative to the ``source_dir``.
+    Returns all paths contained within the source directory. All paths in the returned list of paths
+    are relative to the ``top_dir`` set in the initial call to this function. By default, we do not
+    (and in basically every real use case, you **should** not) specify a ``top_dir``. This causes
+    the ``top_dir`` to be the ``source_dir`` and all returned paths to be relative to the
+    ``source_dir``. Changing the ``top_dir`` will typically result in unexpected pathing problems,
+    broken links, etc.
 
-    Because this function is recursive and acts on its own findings, it would be mostly redundant to call
-    :py:meth:`validate_dir` on each execution of this function. **It is assumed that ``source_dir`` has already been
-    validated.**
+    Because this function is recursive and acts on its own findings, it would be mostly redundant to
+    call :py:meth:`validate_dir` on each execution of this function. **It is therefore assumed that
+    ``source_dir`` has already been validated.**
 
     :param source_dir: Path to the directory to list.
     :type source_dir: str | Path
 
-    :param top_dir: Path to the directory containing the source paths. You should generally never change this from the
-        default.
+    :param top_dir: Path to the directory containing the source paths. You should generally never
+        change this from the default.
     :type top_dir: str | Path
     """
 
@@ -48,7 +50,8 @@ def validate_dir(dir: str) -> bool:
     :param dir: Path to validate as a directory.
     :type dir: str
 
-    :raises ValueError: Raised if the given path does not exist, is not a directory, or cannot be accessed.
+    :raises ValueError: Raised if the given path does not exist, is not a directory, or cannot be
+        accessed.
 
     :return: True if the given path exists
     :rtype: bool
