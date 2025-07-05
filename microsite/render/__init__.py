@@ -114,5 +114,5 @@ def render(
     missed_paths = [path for path in source_files if path not in rendered_paths]
 
     for path in missed_paths:
-        log.debug(f'Copying unrendered file {path}')
+        log.info(f'Copying unrendered file {path}')
         shutil.copy(f'{source_dir}/{path}', f'{target_dir}/{path}')
