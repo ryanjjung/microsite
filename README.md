@@ -17,7 +17,7 @@ Use simple [Markdown](https://daringfireball.net/projects/markdown/syntax) synta
 Use MicroSite's command line tool to convert your Markdown into HTML.
 
 ```
-python -m microsite render sample-site/ output/ -r
+python -m microsite sample-project.toml render
 ```
 
 ## To Do
