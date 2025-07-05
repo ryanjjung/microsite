@@ -7,6 +7,7 @@ import shutil
 
 from abc import ABC, abstractmethod
 from microsite import path as ms_path
+from microsite.util import AttrDict
 from shutil import rmtree
 from pathlib import Path
 
@@ -20,21 +21,33 @@ class RenderEngine(ABC):
     :param engine: The name of the rendering engine.
     :type engine: str
 
-    :param config: A dict containing operating parameters for this rendering engines. The names of those parameters must
-        begin with "eng_{engine}". The values will be stored as attributes on that rendering engine without that prefix.
-        For example, a key called "eng_markdown_html_template" will become `self.html_template`.
+    :param config: A dict containing operating parameters for this rendering engines.
     :type config: dict
     """
 
-    def __init__(self, engine: str, config: dict):
-        prefix = f'eng_{engine}_'
-        engine_opts = {key.replace(prefix, ''): value for key, value in config.items()}
-        for key, value in engine_opts.items():
-            setattr(self, key, value)
-        log.debug(f'Created rendering engine {engine} with options: {engine_opts}')
+    def __init__(self, name: str, config: AttrDict):
+        self.name = name
+        self.config = config
+        log.debug(f'Created rendering engine {name} with options: {config}')
 
     @abstractmethod
-    def render(self, paths: list[str]) -> bool:
+    def render(self, source_dir: str, target_dir: str, paths: list[str]) -> list[str]:
+        """
+        Abstract function representing a RenderEngine's rendering process.
+
+        :param source_dir: Top-level directory containing source files to render.
+        :type source_dir: str | Path 
+
+        :param target_dir: Top-level directory to render files into.
+        :type target_dir: str | Path
+
+        :param paths: List of all paths in the source directory to be processed. Not every path in
+            this list will be rendered.
+        :type paths: list[str]
+
+        :return: List of paths this RenderEngine made alterations to.
+        :rtype: list[str]
+        """
         pass
 
 
@@ -42,50 +55,64 @@ def render(
     engines: list[RenderEngine],
     source_dir: str,
     target_dir: str,
-    delete_target_dir: bool = False,
+    delete_target_dir: bool = True,
 ) -> None:
     """
-    Discover all files contained within ``source_dir``. Pass all files into each rendering engine. Mark files those
-    engines render and then copy any other files directly over without alteration.
+    Discover all files contained within ``source_dir``. Pass all files into each rendering engine.
+    Track whether each file has been altered by one of these rendering processes. Copy any unaltered
+    files into the target location directly.
 
     :param source_dir: The top level directory containing all source files.
     :type source_dir: str
 
-    :param target_dir: The top level directory where all rendered output will be placed.
+    :param target_dir: The top level directory where all rendered output will be placed. Will be
+        created if it does not exist.
     :type target_dir: str
 
-    :param delete_target_dir: When True, if the target directory exists, delete it before building. Defaults to False.
+    :param delete_target_dir: When True, if the target directory exists, delete it before building.
+        This ensures a clean build environment. Defaults to True.
     :type delete_target_dir: bool, optional
 
-    :raises IOError: When the target directory exists, but you have not provided ``delete_target_dir=True``.
-    :raises ValueError: When the stylesheet's target filename conflicts with a filename in the source content.
+    :raises IOError: When the target directory exists, but you have provided
+        ``delete_target_dir=False``.
+    :raises ValueError: When the stylesheet's target filename conflicts with a filename in the
+        source content.
     """
 
     # Prepare target directory
+    log.debug(f'Preparing target directory: {target_dir}')
     target_path = Path(target_dir)
     if target_path.exists():
         if delete_target_dir:
-            log.info(f'Deleting target directory {target_dir}')
+            log.info('Target directory already exists. Deleting it now to ensure a clean build.')
             rmtree(target_path)
         else:
-            raise IOError(f'Target directory {target_dir} already exists, but you did not specify to delete it.')
+            raise IOError(
+                'Target directory already exists, but project settings specified not to delete it.'
+            )
+
     log.info(f'Creating target directory {target_dir}')
     target_path.mkdir()
 
     log.debug(f'Rendering the contents of {source_dir} into {target_dir}')
     ms_path.validate_dir(source_dir)
     source_files = ms_path.get_all_paths(source_dir=source_dir)
+
     log.debug('Found the following files:')
     for file in source_files:
         log.debug(str(file))
 
     rendered_paths = []
     for engine in engines:
-        rendered_paths.extend(engine.render(source_dir=source_dir, target_dir=target_dir, paths=source_files))
+        rendered_paths.extend(
+            engine.render(source_dir=source_dir, target_dir=target_dir, paths=source_files)
+        )
+    # Remove duplicates from the list
     rendered_paths = set(rendered_paths)
 
+    # Determine what was not affected
     missed_paths = [path for path in source_files if path not in rendered_paths]
 
     for path in missed_paths:
-        log.debug(f'Copying unrendered file {path}')
+        log.info(f'Copying unrendered file {path}')
         shutil.copy(f'{source_dir}/{path}', f'{target_dir}/{path}')

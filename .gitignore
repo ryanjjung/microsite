@@ -193,3 +193,5 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Our own files
+sample-output/
