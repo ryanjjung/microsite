@@ -17,8 +17,22 @@ Use simple [Markdown](https://daringfireball.net/projects/markdown/syntax) synta
 Use MicroSite's command line tool to convert your Markdown into HTML.
 
 ```
-python -m microsite sample-project.toml render
+# python -m microsite sample-project.toml render
+Logging configured.
+Creating target directory sample-output/
+Rendering sample-site/page2.md to sample-output/page2.html
+Rendering sample-site/index.md to sample-output/index.html
+Rendering sample-site/dir/page3.md to sample-output/dir/page3.html
+Copying unrendered file microsite.svg
 ```
+
+Open the output in your web browser:
+
+```
+firefox sample-output/index.html
+```
+
+![Sample Site](sample-site-screenshot.png)
 
 ## To Do
 
