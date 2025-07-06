@@ -155,14 +155,12 @@ class MarkdownRenderEngine(RenderEngine):
 
     def rewrite_md_urls(self, html: BeautifulSoup) -> str:
         log.info('Rewriting URLs in links...')
-        all_a_tags = html.find_all('a')
-        for a_tag in all_a_tags:
-            href = a_tag.get('href')
-            old_href = href
+        for a_tag in html.find_all('a'):
+            old_href = href = a_tag.get('href')
             if href and href.endswith('.md') and not href.startswith('http'):
                 href = href.split('.')
                 href[-1] = 'html'
                 href = '.'.join(href)
                 a_tag['href'] = href
-            log.debug(f'Rewriting {old_href} as {href}')
+                log.debug(f'Rewriting {old_href} as {href}')
         return html
