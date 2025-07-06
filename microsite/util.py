@@ -1,4 +1,5 @@
 import logging
+
 log = logging.getLogger(__name__)
 
 
@@ -14,13 +15,13 @@ class AttrDict(dict):
             if type(arg) is dict:
                 for key, value in arg.items():
                     self.__setitem__(key, value)
-    
+
     def __getattr__(self, attr):
         attr = self.get(attr)
         if type(attr) is dict:
             return AttrDict(attr)
         return attr
-    
+
     def __setattr__(self, key, value):
         self.__setitem__(key, value)
 
@@ -33,7 +34,7 @@ class AttrDict(dict):
 
     def __delattr__(self, key):
         self.__delitem__(key)
-    
+
     def __delitem__(self, key):
         super().__delitem__(key)
         del self.__dict__[key]

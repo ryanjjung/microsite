@@ -2,6 +2,7 @@ import jinja2
 import logging
 import shutil
 
+from bs4 import BeautifulSoup
 from markdown import markdown
 from microsite.render import RenderEngine
 from microsite.util import AttrDict
@@ -32,7 +33,7 @@ class MarkdownRenderEngine(RenderEngine):
         https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
 
         :param source_dir: Top-level directory containing source files to render.
-        :type source_dir: str | Path 
+        :type source_dir: str | Path
 
         :param target_dir: Top-level directory to render files into.
         :type target_dir: str | Path
@@ -136,7 +137,30 @@ class MarkdownRenderEngine(RenderEngine):
         relative_stylesheet = f'{dots}{self.config.stylesheet_target_name}'
         page_html = j2_tpl.render(stylesheet=relative_stylesheet, title='TODO!', html=md_html)
 
+        # Convert to a BS object so we can manipulate it before writing it back out
+        page_html = BeautifulSoup(page_html, features='html.parser')
+
+        if self.config.rewrite_md_urls:
+            page_html = self.rewrite_md_urls(page_html)
+
+        if self.config.pretty_html:
+            page_html = str(page_html.prettify())
+        else:
+            page_html = str(page_html).replace('\n', '')
+
         # Write out the content to the target
         with target.open('w') as file:
             log.debug(f'Writing target file {target}')
             file.write(page_html)
+
+    def rewrite_md_urls(self, html: BeautifulSoup) -> str:
+        log.info('Rewriting URLs in links...')
+        for a_tag in html.find_all('a'):
+            old_href = href = a_tag.get('href')
+            if href and href.endswith('.md') and not href.startswith('http'):
+                href = href.split('.')
+                href[-1] = 'html'
+                href = '.'.join(href)
+                a_tag['href'] = href
+                log.debug(f'Rewriting {old_href} as {href}')
+        return html
