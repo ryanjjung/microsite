@@ -33,7 +33,7 @@ class MarkdownRenderEngine(RenderEngine):
         https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions
 
         :param source_dir: Top-level directory containing source files to render.
-        :type source_dir: str | Path 
+        :type source_dir: str | Path
 
         :param target_dir: Top-level directory to render files into.
         :type target_dir: str | Path
@@ -139,10 +139,10 @@ class MarkdownRenderEngine(RenderEngine):
 
         # Convert to a BS object so we can manipulate it before writing it back out
         page_html = BeautifulSoup(page_html, features='html.parser')
-        
+
         if self.config.rewrite_md_urls:
             page_html = self.rewrite_md_urls(page_html)
-        
+
         if self.config.pretty_html:
             page_html = str(page_html.prettify())
         else:

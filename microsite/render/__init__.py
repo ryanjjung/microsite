@@ -36,7 +36,7 @@ class RenderEngine(ABC):
         Abstract function representing a RenderEngine's rendering process.
 
         :param source_dir: Top-level directory containing source files to render.
-        :type source_dir: str | Path 
+        :type source_dir: str | Path
 
         :param target_dir: Top-level directory to render files into.
         :type target_dir: str | Path
