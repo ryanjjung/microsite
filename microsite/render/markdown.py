@@ -135,7 +135,12 @@ class MarkdownRenderEngine(RenderEngine):
         j2_tpl = j2_env.get_template(_html_template)
         dots = '../' * (len(source_file.split('/')) - 1)
         relative_stylesheet = f'{dots}{self.config.stylesheet_target_name}'
-        page_html = j2_tpl.render(stylesheet=relative_stylesheet, title='TODO!', html=md_html)
+
+        # Get the index config
+        index = AttrDict(self.config.index.get(source_file, {}))
+        title = index.title if index.title else self.config.title
+
+        page_html = j2_tpl.render(stylesheet=relative_stylesheet, title=title, html=md_html)
 
         # Convert to a BS object so we can manipulate it before writing it back out
         page_html = BeautifulSoup(page_html, features='html.parser')
