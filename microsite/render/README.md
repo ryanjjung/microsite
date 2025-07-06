@@ -19,6 +19,7 @@ The Markdown render engine can be configured with the following options:
 - `rewrite_md_urls`: When True, each HTML page is reviewed before being saved. Any links pointing to another project file using the `*.md` extension will have those extensions replaced with `*.html`. This is typically used in conjunction with `rewrite_md_extensions` to preserve the validity of links after rendering. You usually want this set to True, which is the default, although if you disable `rewrite_md_extensions` you may wish to disable this as well.
 - `stylesheet`: Path to the stylesheet to embed with every page. Defaults to the `plain-white.css` stylesheet included in this project.
 - `stylesheet_target_name`: Name to give the stylesheet file when it's copied into the output directory. This defaults to `style.css`, which is typically fine. Change this value if you have some other file in the root directory of your project called `style.css` which would otherwise be overwritten during rendering.   
+- `title` - The value to use as the `<title>` text for each page rendered.
 
 A completely default configuration for your project file looks like this:
 
@@ -32,6 +33,20 @@ rewrite_md_urls = true
 stylesheet = "microsite/render/styles/plain-white.css"
 stylesheet_target_name = "style.css"
 ```
+
+
+### Page Indexing
+
+One special option needs some extra attention: the `index` option. This is a table of metadata about your source files. You define indices by naming a config table after them. For example:
+
+```toml
+[render.engine.markdown.index."page2.md"]
+title = "Page 2!"
+```
+
+Each `index` entry has the following options:
+
+- `title` - Override the `<title>` text for this page.
 
 
 ### Jinja Templates

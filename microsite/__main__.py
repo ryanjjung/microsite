@@ -26,7 +26,7 @@ DEFAULT_PROJECT_CONFIG = {
                 'rewrite_md_urls': True,
                 'stylesheet': 'microsite/render/styles/plain-white.css',
                 'stylesheet_target_name': 'style.css',
-                'template_dir': 'microsite/render/templates/',
+                'title': '',
             }
         },
     }

@@ -12,3 +12,10 @@ rewrite_md_extensions = true
 rewrite_md_urls = true
 stylesheet = "microsite/render/styles/plain-white.css"
 stylesheet_target_name = "style.css"
+title = "Microsite Sample Site"
+
+[render.engine.markdown.index."page2.md"]
+title = "Microsite Sample Site Page 2"
+
+[render.engine.markdown.index."dir/page3.md"]
+title = "Microsite Sample Site Subdirectory Example"
