@@ -19,12 +19,14 @@ DEFAULT_PROJECT_CONFIG = {
         'engines': ['markdown'],
         'engine': {
             'markdown': {
-                'rewrite_md_extensions': True,
-                'html_template': 'markdown.html.j2',
-                'template_dir': 'microsite/render/templates/',
                 'extensions': ['tables', 'md_in_html'],
+                'html_template': 'markdown.html.j2',
+                'pretty_html': False,
+                'rewrite_md_extensions': True,
+                'rewrite_md_urls': True,
                 'stylesheet': 'microsite/render/styles/plain-white.css',
                 'stylesheet_target_name': 'style.css',
+                'template_dir': 'microsite/render/templates/',
             }
         },
     }

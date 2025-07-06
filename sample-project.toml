@@ -5,8 +5,10 @@ delete_target_dir = true
 engines = ["markdown"]
 
 [render.engine.markdown]
-rewrite_md_extensions = true
-html_template = "microsite/render/templates/markdown.html.j2"
 extensions = ["tables", "md_in_html"]
+html_template = "microsite/render/templates/markdown.html.j2"
+pretty_html = true
+rewrite_md_extensions = true
+rewrite_md_urls = true
 stylesheet = "microsite/render/styles/plain-white.css"
 stylesheet_target_name = "style.css"
