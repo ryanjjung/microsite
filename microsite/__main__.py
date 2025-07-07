@@ -55,7 +55,7 @@ def parse_args() -> None:
     parser.add_argument(
         'runmode',
         help='Stage of the process to run',
-        choices=['render'],
+        choices=['publish', 'render'],
     )
     parser.add_argument(
         '-v',

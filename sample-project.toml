@@ -19,3 +19,7 @@ title = "Microsite Sample Site Page 2"
 
 [render.engine.markdown.index."dir/page3.md"]
 title = "Microsite Sample Site Subdirectory Example"
+
+[publish]
+source = "sample-output/"
+target = "s3://microsite-sample-site"

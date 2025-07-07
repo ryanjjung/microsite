@@ -17,9 +17,12 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "beautifulsoup4>=4.13.4,<5",
     "Jinja2>=3.1.6,<4.0",
     "Markdown>=3.8.2,<4.0",
     "python-magic>=0.4.27,<1.0",
+    "tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14",
+    "toml>=0.10.2,<1.0",
 ]
 
 [project.urls]
@@ -29,5 +32,5 @@ issues = "https://github.com/ryanjjung/microsite/issues"
 [project.optional-dependencies]
 dev = [
     "bpython",
-    "ruff>=0.12,<1"
+    "ruff>=0.12,<1.0"
 ]
