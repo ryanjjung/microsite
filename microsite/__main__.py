@@ -114,16 +114,19 @@ def setup_logging(verbose: bool = False) -> None:
 
 def main() -> None:
     """
-    Main entrypoint.
+    Main CLI tool entrypoint.
     """
 
+    # Get configured, announce readiness!
     args = parse_args()
     setup_logging(verbose=args.verbose)
     logging.debug(f'Program started with args: {args}')
     logging.debug(f'Running in {args.runmode} mode')
-
+    
+    # Load the project config file
     project = get_config(args.project)
 
+    # Render Mode
     if args.runmode == 'render':
         from microsite.render import render
 
@@ -138,6 +141,8 @@ def main() -> None:
             target_dir=project.render.target,
             delete_target_dir=project.render.delete_target_dir,
         )
+    
+    # Publish Mode
     if args.runmode == 'publish':
         for target in project.publish.targets:
             target_config = AttrDict(project.publish.targets[target])

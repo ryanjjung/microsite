@@ -6,11 +6,15 @@ from pathlib import Path
 
 
 class TbPulumiS3Website(TBPulumiPublishEngine):
+    """
+    Publishes a site using Thunderbird Pulumi's S3Website pattern.
+    """
+
     def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
         super().__init__(name=name, source_dir=source_dir, config=config, dry_run=dry_run)
 
-        # These variables change when developers can test the changes and shouldn't be adjustable by
-        # the end user, generally.
+        # These variables change when developers can test the changes and generally shouldn't be
+        # adjustable by the end user.
         self.python_dependencies = [
             'pulumi_aws>=6.65.0,<7',
             'tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14',
@@ -30,6 +34,10 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         self.file_requirements_txt = self.work_dir / 'requirements.txt'
 
     def construct_config_stack_yaml(self):
+        """
+        Constructs the ``config.$stack.yaml`` file required by tb_pulumi.
+        """
+
         template = self.website_templates.get_template('config.stack.yaml.j2')
         source_dir = str(Path(self.source_dir).resolve())
         content = template.render(
@@ -43,6 +51,10 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
             file.write(content)
 
     def construct_main_py(self):
+        """
+        Constructs the __main__.py file that defines the build pattern.
+        """
+
         template = self.website_templates.get_template('__main__.py.j2')
         content = template.render({})
 
@@ -50,10 +62,17 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
             file.write(content)
 
     def construct_requirements_txt(self):
+        """
+        Constructs the ``requirements.txt`` file that installs the right providers.
+        """
+
         with self.file_requirements_txt.open('w') as file:
             file.write('\n'.join(self.python_dependencies))
 
     def publish(self):
+        """
+        Publishes the site as a ``tb_pulumi.s3.S3Website``.
+        """
         self.ensure_work_dir()
         self.construct_requirements_txt()
         self.construct_config_stack_yaml()
