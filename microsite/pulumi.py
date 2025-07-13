@@ -39,11 +39,11 @@ class PulumiProject:
                 'Deleting it to ensure a clean working environment.'
             )
             shutil.rmtree()
-        
+
         workdir.mkdir(parents=True)
-    
+
     def populate_workdir(self):
         return NotImplementedError
-    
+
     def run_pulumi(self):
         pulumi.automation.create_or_select_stack(stack_name=self.stack_name, work_dir=self.workdir)

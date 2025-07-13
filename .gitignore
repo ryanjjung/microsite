@@ -195,3 +195,5 @@ cython_debug/
 
 # Our own files
 sample-output/
+**/pulumi.log
+**/pulumi.err

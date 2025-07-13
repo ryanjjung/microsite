@@ -1,4 +1,62 @@
-from microsite.publish import PublishEngine
+import jinja2
 
-class TbPulumiS3Website(PublishEngine):
-    def __init__(self, )
+from microsite.util import AttrDict
+from microsite.publish import TBPulumiPublishEngine
+from pathlib import Path
+
+
+class TbPulumiS3Website(TBPulumiPublishEngine):
+    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
+        super().__init__(name=name, source_dir=source_dir, config=config, dry_run=dry_run)
+
+        # These variables change when developers can test the changes and shouldn't be adjustable by
+        # the end user, generally.
+        self.python_dependencies = [
+            'pulumi_aws>=6.65.0,<7',
+            'tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14',
+        ]
+        template_dir = Path(
+            'microsite/publish/static/pulumi/tb_pulumi/s3_website/templates'
+        ).resolve()
+
+        # Jinja environment for other functions to operate in
+        _j2_loader = jinja2.FileSystemLoader(searchpath=template_dir)
+        self.website_templates = jinja2.Environment(loader=_j2_loader)
+
+        # These variables adjust according to user input
+        self.filename_config_stack_yaml = f'config.{self.config.pulumi_stack_name}.yaml'
+        self.file_config_stack_yaml = self.work_dir / self.filename_config_stack_yaml
+        self.file_main_py = self.work_dir / '__main__.py'
+        self.file_requirements_txt = self.work_dir / 'requirements.txt'
+
+    def construct_config_stack_yaml(self):
+        template = self.website_templates.get_template('config.stack.yaml.j2')
+        source_dir = str(Path(self.source_dir).resolve())
+        content = template.render(
+            {
+                's3_bucket_name': self.config.publish_bucket,
+                'source_dir': source_dir,
+            }
+        )
+
+        with self.file_config_stack_yaml.open('w') as file:
+            file.write(content)
+
+    def construct_main_py(self):
+        template = self.website_templates.get_template('__main__.py.j2')
+        content = template.render({})
+
+        with self.file_main_py.open('w') as file:
+            file.write(content)
+
+    def construct_requirements_txt(self):
+        with self.file_requirements_txt.open('w') as file:
+            file.write('\n'.join(self.python_dependencies))
+
+    def publish(self):
+        self.ensure_work_dir()
+        self.construct_requirements_txt()
+        self.construct_config_stack_yaml()
+        self.construct_main_py()
+        self.validate_work_dir()
+        super().publish()

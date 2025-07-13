@@ -1,0 +1,14 @@
+---
+name: {{ project_name }}
+description: {{ project_description }}
+backend:
+    url: {{ state_url }}
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-python

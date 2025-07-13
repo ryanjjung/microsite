@@ -12,3 +12,11 @@ website = s3.S3BucketWebsite(
     project=project,
     **website_opts,
 )
+
+{% if cloudfront_enabled %}
+{# Do something with CloudFront here #}
+{% endif %}
+
+{% if dns_enabled %}
+{# Set up DNS here #}
+{% endif %}

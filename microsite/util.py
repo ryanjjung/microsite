@@ -53,6 +53,7 @@ class Engine:
     :type config: dict
 
     """
+
     def __init__(self, name: str, config: AttrDict):
         self.name = name
         self.config = config

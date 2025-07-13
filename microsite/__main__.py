@@ -7,6 +7,7 @@ import tomllib
 
 from argparse import ArgumentParser
 from copy import deepcopy
+from microsite.publish.s3 import TbPulumiS3Website
 from microsite.render.markdown import MarkdownRenderEngine
 from microsite.util import AttrDict
 
@@ -34,6 +35,10 @@ DEFAULT_PROJECT_CONFIG = {
 
 MARKDOWN_EXTENSION_DOCS_URL = 'https://github.com/Python-Markdown/markdown/blob/master/docs/extensions/index.md#officially-supported-extensions'
 
+PUBLISH_ENGINE_CLASS_MAP = {
+    'tbp_s3website': TbPulumiS3Website,
+}
+
 RENDER_ENGINE_CLASS_MAP = {
     'markdown': MarkdownRenderEngine,
 }
@@ -56,6 +61,16 @@ def parse_args() -> None:
         'runmode',
         help='Stage of the process to run',
         choices=['publish', 'render'],
+    )
+    parser.add_argument(
+        '-d',
+        '--dry-run',
+        help=(
+            'Do not perform any actions that affect a live site, but log the actions that would '
+            'have been taken otherwise.'
+        ),
+        default=False,
+        action='store_true',
     )
     parser.add_argument(
         '-v',
@@ -124,7 +139,14 @@ def main() -> None:
             delete_target_dir=project.render.delete_target_dir,
         )
     if args.runmode == 'publish':
-        logging.info('Not yet implemented!')
+        for target in project.publish.targets:
+            target_config = AttrDict(project.publish.targets[target])
+            PUBLISH_ENGINE_CLASS_MAP[target_config.engine](
+                name=target,
+                source_dir=project.publish.source,
+                config=target_config,
+                dry_run=args.dry_run,
+            ).publish()
 
 
 if __name__ == '__main__':
