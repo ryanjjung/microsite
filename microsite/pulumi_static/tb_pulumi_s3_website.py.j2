@@ -1,0 +1,14 @@
+#!/bin/env python
+
+import pulumi
+from tb_pulumi import cloudfront, s3, ThunderbirdPulumiProject
+
+project = ThunderbirdPulumiProject()
+resources = project.config.get('resources')
+
+website_opts = resources.get('tb:s3:S3BucketWebsite', {}).get('site', {})
+website = s3.S3BucketWebsite(
+    name='microsite-s3-bucket-website',
+    project=project,
+    **website_opts,
+)
