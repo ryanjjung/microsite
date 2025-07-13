@@ -5,9 +5,9 @@ Module for rendering HTML files from source Markdown files.
 import logging
 import shutil
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractclassmethod
 from microsite import path as ms_path
-from microsite.util import AttrDict
+from microsite.util import AttrDict, Engine
 from shutil import rmtree
 from pathlib import Path
 
@@ -15,22 +15,21 @@ from pathlib import Path
 log = logging.getLogger(__name__)
 
 
-class RenderEngine(ABC):
+class RenderEngine(ABC, Engine):
     """Abstract class representing common features of a rendering engine.
 
-    :param engine: The name of the rendering engine.
-    :type engine: str
+    :param name: The name of the rendering engine.
+    :type name: str
 
     :param config: A dict containing operating parameters for this rendering engines.
     :type config: dict
     """
 
     def __init__(self, name: str, config: AttrDict):
-        self.name = name
-        self.config = config
+        super().__init__(name=name, config=config)
         log.debug(f'Created rendering engine {name} with options: {config}')
 
-    @abstractmethod
+    @abstractclassmethod
     def render(self, source_dir: str, target_dir: str, paths: list[str]) -> list[str]:
         """
         Abstract function representing a RenderEngine's rendering process.

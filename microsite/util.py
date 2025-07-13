@@ -38,3 +38,22 @@ class AttrDict(dict):
     def __delitem__(self, key):
         super().__delitem__(key)
         del self.__dict__[key]
+
+
+class Engine:
+    """
+    All of the tools here fall into different run modes, such as "render" and "publish". Each of
+    these implements different kinds of "engines" to power those tools. This is the base class for
+    those engines' base classes, containing a name and an arbitrary config dict.
+
+    :param name: The name of the engine.
+    :type name: str
+
+    :param config: A dict containing operating parameters for this engine.
+    :type config: dict
+
+    """
+
+    def __init__(self, name: str, config: AttrDict):
+        self.name = name
+        self.config = config
