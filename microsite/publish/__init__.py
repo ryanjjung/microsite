@@ -30,11 +30,12 @@ class PublishEngine(ABC, Engine):
     :type dry_run: bool
     """
 
-    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
+    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool, destroy: bool):
         self.name = name
         self.source_dir = source_dir
         self.config = config
         self.dry_run = dry_run
+        self.destroy = destroy
 
     @abstractclassmethod
     def publish(self):
@@ -51,8 +52,15 @@ class PulumiPublishEngine(PublishEngine):
     manages a working directory where Pulumi can manage its local execution environment.
     """
 
-    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
-        super().__init__(name=name, source_dir=source_dir, config=config, dry_run=dry_run)
+    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool, destroy: bool):
+        super().__init__(
+            name=name, source_dir=source_dir, config=config, dry_run=dry_run, destroy=destroy
+        )
+
+        if self.dry_run and self.destroy:
+            raise ValueError(
+                'The "dry run" and "destroy" options are not compatible. Refusing to continue.'
+            )
 
         # If we used a temporary working directory, default to not persisting it. If a work_dir was
         # specified by the user, default to persisisting it. Always allow the user to override the
@@ -106,8 +114,6 @@ class PulumiPublishEngine(PublishEngine):
 
         # Always suppress tb_pulumi's stack-level protection
         env_vars['TBPULUMI_DISABLE_PROTECTION'] = 'True'
-
-        log.debug(f'DEBUG -- env_vars: {env_vars}')
 
         return env_vars
 
@@ -207,6 +213,12 @@ class PulumiPublishEngine(PublishEngine):
                 f'Errors will be shown in {pulumi_error_log}'
             )
             response = stack.preview()
+        elif self.destroy:
+            log.info(
+                f'Destroying the site. See {pulumi_log} for progress, '
+                f'{pulumi_error_log} for errors.'
+            )
+            response = stack.destroy()
         else:
             log.info(
                 f'Deploying the site. See {pulumi_log} for progress, {pulumi_error_log} for errors.'
@@ -217,7 +229,7 @@ class PulumiPublishEngine(PublishEngine):
                 file.write(response.stdout)
             with open(pulumi_error_log, 'w') as file:
                 file.write(response.stderr)
-        
+
         self.cleanup()
 
     def cleanup(self):
@@ -239,8 +251,11 @@ class TBPulumiPublishEngine(PulumiPublishEngine):
     extension. This class exists to provide additional validation for the files required by
     tb_pulumi.
     """
-    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
-        super().__init__(name=name, source_dir=source_dir, config=config, dry_run=dry_run)
+
+    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool, destroy: bool):
+        super().__init__(
+            name=name, source_dir=source_dir, config=config, dry_run=dry_run, destroy=destroy
+        )
 
     def validate_work_dir(self):
         """
