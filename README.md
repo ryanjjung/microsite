@@ -54,3 +54,15 @@ Deleting working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3w
 
 
 **Your site is [now live](http://microsite-sample-site.s3-website-us-east-1.amazonaws.com)!**
+
+
+**Take your site offline**
+
+```
+> python -m microsite sample-project.toml publish -x
+Logging configured.
+Ensuring the working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod exists.
+Publishing using Pulumi
+Destroying the site. See pulumi.log for progress, pulumi.err for errors.
+Deleting working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod
+```

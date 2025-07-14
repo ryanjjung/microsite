@@ -10,8 +10,10 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
     Publishes a site using Thunderbird Pulumi's S3Website pattern.
     """
 
-    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool):
-        super().__init__(name=name, source_dir=source_dir, config=config, dry_run=dry_run)
+    def __init__(self, name: str, source_dir: str, config: AttrDict, dry_run: bool, destroy: bool):
+        super().__init__(
+            name=name, source_dir=source_dir, config=config, dry_run=dry_run, destroy=destroy
+        )
 
         # These variables change when developers can test the changes and generally shouldn't be
         # adjustable by the end user.

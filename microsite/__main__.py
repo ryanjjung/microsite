@@ -4,6 +4,7 @@ Main entrypoint to the microsite command line utility.
 
 import logging
 import tomllib
+import sys
 
 from argparse import ArgumentParser
 from copy import deepcopy
@@ -58,11 +59,21 @@ def parse_args() -> None:
         help='TOML file containing the settings for your project',
     )
     parser.add_argument(
-        'runmode',
-        help='Stage of the process to run',
-        choices=['publish', 'render'],
+        '-v',
+        '--verbose',
+        help='Produce additional output for debugging purposes',
+        default=False,
+        action='store_true',
     )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(help='Runmode for the tool', dest='runmode')
+    render_parser = subparsers.add_parser(
+        'render', help='Run in render mode to convert content into web content'
+    )
+    publish_parser = subparsers.add_parser(
+        'publish',
+        help='Run in publish mode to alter a live site',
+    )
+    publish_parser.add_argument(
         '-d',
         '--dry-run',
         help=(
@@ -72,10 +83,10 @@ def parse_args() -> None:
         default=False,
         action='store_true',
     )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        help='Produce additional output for debugging purposes',
+    publish_parser.add_argument(
+        '-x',
+        '--destroy',
+        help='Destroy this site and its infrastructure.',
         default=False,
         action='store_true',
     )
@@ -122,7 +133,7 @@ def main() -> None:
     setup_logging(verbose=args.verbose)
     logging.debug(f'Program started with args: {args}')
     logging.debug(f'Running in {args.runmode} mode')
-    
+
     # Load the project config file
     project = get_config(args.project)
 
@@ -141,7 +152,7 @@ def main() -> None:
             target_dir=project.render.target,
             delete_target_dir=project.render.delete_target_dir,
         )
-    
+
     # Publish Mode
     if args.runmode == 'publish':
         for target in project.publish.targets:
@@ -151,6 +162,7 @@ def main() -> None:
                 source_dir=project.publish.source,
                 config=target_config,
                 dry_run=args.dry_run,
+                destroy=args.destroy,
             ).publish()
 
 
