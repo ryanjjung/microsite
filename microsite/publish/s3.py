@@ -44,7 +44,6 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         source_dir = str(Path(self.source_dir).resolve())
         content = template.render(
             {
-                'logging_bucket_name': f'{self.config.publish_bucket}-logs',
                 's3_bucket_name': self.config.publish_bucket,
                 'source_dir': source_dir,
             }
