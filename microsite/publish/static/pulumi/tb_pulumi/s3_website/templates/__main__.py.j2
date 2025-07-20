@@ -1,22 +1,69 @@
 #!/bin/env python
 
+import boto3
 import pulumi
+import pulumi_aws as aws
 from tb_pulumi import cloudfront, s3, ThunderbirdPulumiProject
+from tb_pulumi.constants import CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED
 
+# tb_pulumi setup
 project = ThunderbirdPulumiProject()
 resources = project.config.get('resources')
 
+# Build an S3 Bucket Website
 website_opts = resources.get('tb:s3:S3BucketWebsite', {}).get('site', {})
 website = s3.S3BucketWebsite(
     name='microsite-s3-bucket-website',
     project=project,
     **website_opts,
 )
+bucket_name = website_opts.get('bucket_name')
+website_endpoint = website.resources.get('website').website_endpoint
 
-{% if cloudfront_enabled %}
-{# Do something with CloudFront here #}
-{% endif %}
+# Put a CloudFront Distribution in front of it
+cf_distro_opts = resources.get('tb:cloudfront:CloudFrontDistribution', {}).get('site', {})
+full_domain = '{{ subdomain }}.{{ domain }}'
+website_origin_id = f's3-{bucket_name}' or 's3-bucket'
+cf_distro = aws.cloudfront.Distribution(
+    'microsite-cloudfront-distribution',
+    aliases=[full_domain],
+    default_cache_behavior={
+        'allowed_methods': ['GET', 'HEAD'],
+        'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED,
+        'cached_methods': ['GET', 'HEAD'],
+        'target_origin_id': website_origin_id,
+        'viewer_protocol_policy': 'redirect-to-https',
+    },
+    enabled=True,
+    origins=[{
+        'domain_name': website_endpoint,
+        'origin_id': website_origin_id,
+        'custom_origin_config': {
+            'http_port': 80,
+            'https_port': 443,
+            'origin_protocol_policy': 'http-only',
+            'origin_ssl_protocols': ['TLSv1.2'],
+        },
+        # 'origin_access_control_id': oac.id,
+    }],
+    restrictions={
+        'geo_restriction': {
+            'restriction_type': 'none',
+        }
+    },
+    viewer_certificate={
+        'acm_certificate_arn': '{{ acm_certificate_arn }}',
+        'ssl_support_method': 'sni-only',
+    }
+)
+project.resources['cloudfront_distribution'] = cf_distro
 
-{% if dns_enabled %}
-{# Set up DNS here #}
-{% endif %}
+# Create a DNS record pointing to it
+cname = aws.route53.Record(
+    'microsite-dns-record',
+    name=full_domain,
+    records=[cf_distro.domain_name],
+    ttl=300,
+    type='CNAME',
+    zone_id='{{ route53_zone_id }}',
+)

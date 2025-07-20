@@ -8,9 +8,14 @@ Tools for building a small web.
 MicroSite is a tool of simplicity. Use it to reduce the difficulty of publishing static content on the web.
 
 
-**Build Your Content with Markdown**
+**Build your content with Markdown**
 
 Use simple [Markdown](https://daringfireball.net/projects/markdown/syntax) syntax to create your content in a separate directory. See our [sample site](sample-site/) for some examples.
+
+
+**Write a project configuration file**
+
+Make a copy of `sample-project.toml` and adjust it to suit your needs.
 
 
 **Render the Content into HTML**
@@ -49,20 +54,20 @@ Logging configured.
 Ensuring the working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod exists.
 Publishing using Pulumi
 Deploying the site. See pulumi.log for progress, pulumi.err for errors.
-Deleting working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod
+Deleting working directory /home/ryan/workspace/ryanjjung/microsite/.tbpulumi
 ```
 
 
-**Your site is [now live](http://microsite-sample-site.s3-website-us-east-1.amazonaws.com)!**
+**Your site is [now live](https://samplesite.microsite.info)!**
 
 
 **Take your site offline**
 
 ```
-> python -m microsite sample-project.toml publish -x
+> python -m microsite sample-project.toml publish --destroy
 Logging configured.
 Ensuring the working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod exists.
 Publishing using Pulumi
 Destroying the site. See pulumi.log for progress, pulumi.err for errors.
-Deleting working directory /home/ryan/workspace/ryanjjung/microsite/tbpulumi-s3website-prod
+Deleting working directory /home/ryan/workspace/ryanjjung/microsite/.tbpulumi
 ```
