@@ -62,7 +62,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
             'acm_certificate_arn': self.config.acm_certificate_arn,
             'domain': self.config.domain,
             'route53_zone_id': self.config.route53_zone_id,
-            'subdomains': self.config.subdomains,
+            'subdomain': self.config.subdomain,
         })
 
         with self.file_main_py.open('w') as file:
