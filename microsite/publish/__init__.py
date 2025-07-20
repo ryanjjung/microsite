@@ -65,14 +65,14 @@ class PulumiPublishEngine(PublishEngine):
         # If we used a temporary working directory, default to not persisting it. If a work_dir was
         # specified by the user, default to persisisting it. Always allow the user to override the
         # setting.
-        self.use_temp_work_dir = False if self.config.work_dir else True
+        self.use_temp_work_dir = False if self.config.pulumi_work_dir else True
         default_persist_work_dir = False if self.use_temp_work_dir else True
         self.persist_work_dir = self.config.get('persist_work_dir', default_persist_work_dir)
 
         # Set up a temporary working environment if need be
         if self.use_temp_work_dir:
             self.temp_work_dir = TemporaryDirectory(dir='.', prefix='pulumi_')
-            self.config.work_dir = self.temp_work_dir.name
+            self.config.pulumi_work_dir = self.temp_work_dir.name
         else:
             self.temp_work_dir = None
 
@@ -82,7 +82,7 @@ class PulumiPublishEngine(PublishEngine):
         self.pulumi_templates = jinja2.Environment(loader=_j2_loader)
 
         # Pulumi's operating environment
-        self.work_dir = Path(self.config.work_dir).resolve()
+        self.work_dir = Path(self.config.pulumi_work_dir).resolve()
         self.work_dir_str = str(self.work_dir)
         self.pulumi_environment = self.__build_pulumi_environment()
 

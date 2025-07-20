@@ -61,8 +61,9 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         template = self.website_templates.get_template('__main__.py.j2')
         content = template.render({
             'acm_certificate_arn': self.config.acm_certificate_arn,
-            'full_domain': f'{self.config.subdomain}.{self.config.domain}',
+            'domain': self.config.domain,
             'route53_zone_id': self.config.route53_zone_id,
+            'subdomains': self.config.subdomains,
         })
 
         with self.file_main_py.open('w') as file:

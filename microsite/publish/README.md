@@ -27,7 +27,7 @@ These publish engines use the Pulumi infrastructure-as-code tool to build sites.
 - `pulumi_error_log`: File to save Pulumi's error output in.
 - `pulumi_stack_name`: Name of the "stack" (an instance of your site) to use. This is an advanced feature that you should only alter if you have some knowledge of Pulumi itself.
 - `pulumi_state_s3_bucket`: The S3 bucket in which Pulumi should store its state files. Ignored if `pulumi_state_backend` is not "s3".
-- `work_dir`: Path to the directory to use as a working environment. If this is not provided, a randomly named directory will be created.
+- `pulumi_work_dir`: Path to the directory to use as a working environment. If this is not provided, a randomly named directory will be created.
 - `persist_work_dir`: When True, the working directory will not be deleted between publish runs. If this is ignored, behavior will depend on whether a `work_dir` was specified. If this tool is told to build a temporary working directory, this will default to False and the directory will be deleted after the run. If a `work_dir` was specified, it will be left alone after the run unless this is explicitly set to False.
 
 
@@ -39,6 +39,10 @@ This supports all of the config options for other Pulumi publishers. It also sup
 
 - `publish_bucket`: The S3 bucket the site should be deployed to. Do not create this bucket, as it will be managed by this tool.
 - `index_document`: If a site visitor requests a URL that ends in a slash (`/`), this file will be served from that directory. This is usually `index.html`. It must return a file that really exists or the server will return a `404 Not Found` error.
+- `acm_certificate_arn`: The ARN of the AWS Certificate Manager certificate to secure site communication with.
+- `domain`: The top-level domain you will publish under.
+- `subdomain`: The subdomain to publish under. For example, if your domain is `foobar.com` and your subdomain is `fizzbuzz`, your content will be published at `fizzbuzz.foobar.com`.
+- `route53_zone_id`: The zone ID of the Route53 hosted zone to build DNS records in.
 
 An example config:
 
@@ -55,8 +59,12 @@ pulumi_log = "pulumi.log"
 pulumi_error_log = "pulumi.err"
 pulumi_stack_name = "prod"
 pulumi_state_s3_bucket = "microsite-sample-site-pulumi"
-publish_bucket = "microsite-sample-site"
-work_dir = "tbpulumi-s3website-prod"
+pulumi_work_dir = "tbpulumi-s3website-prod"
 persist_work_dir = false
+publish_bucket = "microsite-sample-site"
 index_document = "index.html"
+acm_certificate_arn = "arn:aws:acm:...."
+domain = "yourdomain.com"
+subdomain = "www"
+route53_zone_id = "Z0123456789ABCDEF"
 ```
