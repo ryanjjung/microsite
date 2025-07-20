@@ -2,6 +2,10 @@
 
 import pulumi
 from tb_pulumi import cloudfront, s3, ThunderbirdPulumiProject
+from tb_pulumi.constants import (
+    CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED,
+    CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER
+)
 
 project = ThunderbirdPulumiProject()
 resources = project.config.get('resources')
@@ -12,11 +16,42 @@ website = s3.S3BucketWebsite(
     project=project,
     **website_opts,
 )
+website_endpoint = website.resources.get('website').website_endpoint
 
-{% if cloudfront_enabled %}
-{# Do something with CloudFront here #}
-{% endif %}
-
-{% if dns_enabled %}
-{# Set up DNS here #}
-{% endif %}
+cf_distro_opts = resources.get('tb:cloudfront:CloudFrontDistribution', {}).get('site', {})
+full_domain = '{{ full_domain }}'
+website_origin_id = website_opts.get('bucket_name') or 's3-bucket'
+cf_distro = cloudfront.CloudFrontDistribution(
+    name='microsite-cloudfront-distribution',
+    project=project,
+    distribution={
+        'aliases': [full_domain],
+        'comment': 'Powered by Microsite',
+        'default_cache_behavior': {
+            'allowed_methods': [ 'GET', 'HEAD' ],
+            'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED,
+            'cached_methods': [ 'GET', 'HEAD' ],
+            'origin_request_policy_id': CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER,
+            'target_origin_id': website_origin_id,
+            'viewer_protocol_policy': 'redirect-to-https',
+        },
+        'enabled': True,
+        'origins': [{
+            'custom_origin_config': {
+                'http_port': 80,
+                'https_port': 443,
+                'origin_protocol_policy': 'https-only',
+                'origin_ssl_protocols': [ 'TLSv1.2' ],
+            },
+            'domain_name': website_endpoint,
+            'origin_id': website_origin_id,
+        }],
+        'restrictions': { 'geo_restriction': { 'restriction_type': 'none' } },
+        'viewer_certificate': {
+            'acm_certificate_arn': '{{ acm_certificate_arn }}',
+            'ssl_support_method': 'sni-only',
+        },
+    },
+    **cf_distro_opts,
+    opts=pulumi.ResourceOptions(depends_on=[website])
+)

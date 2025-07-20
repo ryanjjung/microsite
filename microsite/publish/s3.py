@@ -44,6 +44,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         source_dir = str(Path(self.source_dir).resolve())
         content = template.render(
             {
+                'logging_bucket_name': f'{self.config.publish_bucket}-logs',
                 's3_bucket_name': self.config.publish_bucket,
                 'source_dir': source_dir,
             }
@@ -58,7 +59,10 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         """
 
         template = self.website_templates.get_template('__main__.py.j2')
-        content = template.render({})
+        content = template.render({
+            'acm_certificate_arn': self.config.acm_certificate_arn,
+            'full_domain': f'{self.config.subdomain}.{self.config.domain}',
+        })
 
         with self.file_main_py.open('w') as file:
             file.write(content)

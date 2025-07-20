@@ -7,3 +7,7 @@ resources:
             website_config:
                 index_document:
                     suffix: index.html
+    
+    tb:cloudfront:CloudFrontDistribution:
+        site:
+            logging_bucket_name: {{ logging_bucket_name }}
