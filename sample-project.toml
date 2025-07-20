@@ -43,3 +43,4 @@ index_document = "index.html"
 acm_certificate_arn = 'arn:aws:acm:us-east-1:532858392101:certificate/f2e41eed-7949-4df3-a47a-2b6f140b62b4'
 domain = 'microsite.info'
 subdomain = 'samplesite'
+route53_zone_id = 'Z0533536WZ23LJ3S45C2'
