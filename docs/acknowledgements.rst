@@ -17,7 +17,11 @@ make this work.
 - `Markdown <https://daringfireball.net/projects/markdown/syntax>`_: A very simple markup language
   that provides an entry point for producing HTML. This helps minimize the complexity of producing
   valid web pages. We convert it to HTML during the rendering process.
-- `Jinja <https://jinja.palletsprojects.com/en/stable/>`_ Jinja is the templating engine that lets
+- `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_: We build our documentation using the
+  Sphinx tool and the
+  `Restructured Text <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#rst-primer>`_
+  markup language.
+- `Jinja <https://jinja.palletsprojects.com/en/stable/>`_: Jinja is the templating engine that lets
   us programmatically insert your content into a larger web page structure. It ensures that your
   pages are all consistently arranged and styled.
 - `Pulumi <https://www.pulumi.com/>`_: Pulumi is an "infrastructure as code" tool. It allows us to

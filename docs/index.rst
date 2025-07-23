@@ -16,5 +16,5 @@ online.
     ./concepts
     ./render-engines
     ./publish-engines
-    ./modules
     ./acknowledgements
+    ./modules
