@@ -197,3 +197,4 @@ cython_debug/
 sample-output/
 **/pulumi.log
 **/pulumi.err
+docs/_doctrees/**

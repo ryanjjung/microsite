@@ -32,5 +32,7 @@ issues = "https://github.com/ryanjjung/microsite/issues"
 [project.optional-dependencies]
 dev = [
     "bpython",
-    "ruff>=0.12,<1.0"
+    "furo>=2025.7.19",
+    "ruff>=0.12,<1.0",
+    "Sphinx>=8.2.3,<9.0",
 ]
