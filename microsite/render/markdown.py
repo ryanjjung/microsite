@@ -16,7 +16,9 @@ class MarkdownRenderEngine(RenderEngine):
         super().__init__(name='markdown', config=config)
 
         # Convert template path string to proper Path
-        self.html_template = Path(self.config.html_template)
+        self.html_template = Path(
+            self.config.html_template or 'microsite/render/templates/markdown.html.j2'
+        )
 
         # Resolve any pathing complications like symlinks into "real" paths
         self.html_template = Path.resolve(self.html_template)
