@@ -32,7 +32,7 @@ class PulumiProject:
         Ensures the Pulumi working directory exists.
         """
 
-        workdir = Path(self.workdir).resolve()
+        workdir = Path(self.workdir).expanduser().resolve()
         if workdir.exists:
             log.debug(
                 f'Working directory {str(workdir)} exists. '

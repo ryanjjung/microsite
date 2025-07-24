@@ -77,12 +77,12 @@ class PulumiPublishEngine(PublishEngine):
             self.temp_work_dir = None
 
         # Jinja environment for other functions to operate in
-        template_dir = Path('microsite/publish/static/pulumi/templates').resolve()
+        template_dir = Path('microsite/publish/static/pulumi/templates').expanduser().resolve()
         _j2_loader = jinja2.FileSystemLoader(searchpath=template_dir)
         self.pulumi_templates = jinja2.Environment(loader=_j2_loader)
 
         # Pulumi's operating environment
-        self.work_dir = Path(self.config.pulumi_work_dir).resolve()
+        self.work_dir = Path(self.config.pulumi_work_dir).expanduser().resolve()
         self.work_dir_str = str(self.work_dir)
         self.pulumi_environment = self.__build_pulumi_environment()
 
@@ -109,8 +109,14 @@ class PulumiPublishEngine(PublishEngine):
             with open(self.config.pulumi_access_token_file, 'r') as file:
                 env_vars['PULUMI_CONFIG_ACCESS_TOKEN'] = file.read().strip()
 
-        with open(self.config.pulumi_passphrase_file, 'r') as file:
-            env_vars['PULUMI_CONFIG_PASSPHRASE'] = file.read().strip()
+        if self.config.pulumi_passphrase_file:
+            self.config.pulumi_passphrase_file = (
+                Path(self.config.pulumi_passphrase_file).expanduser().resolve()
+            )
+            with self.config.pulumi_passphrase_file.open('r') as file:
+                env_vars['PULUMI_CONFIG_PASSPHRASE'] = file.read().strip()
+        else:
+            env_vars['PULUMI_CONFIG_PASSPHRASE'] = ''
 
         # Always suppress tb_pulumi's stack-level protection
         env_vars['TBPULUMI_DISABLE_PROTECTION'] = 'True'
