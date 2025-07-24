@@ -23,7 +23,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         ]
         template_dir = Path(
             'microsite/publish/static/pulumi/tb_pulumi/s3_website/templates'
-        ).resolve()
+        ).expanduser().resolve()
 
         # Jinja environment for other functions to operate in
         _j2_loader = jinja2.FileSystemLoader(searchpath=template_dir)
@@ -41,7 +41,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         """
 
         template = self.website_templates.get_template('config.stack.yaml.j2')
-        source_dir = str(Path(self.source_dir).resolve())
+        source_dir = str(Path(self.source_dir).expanduser().resolve())
         content = template.render(
             {
                 's3_bucket_name': self.config.publish_bucket,

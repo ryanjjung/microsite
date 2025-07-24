@@ -16,7 +16,9 @@ class MarkdownRenderEngine(RenderEngine):
         super().__init__(name='markdown', config=config)
 
         # Convert template path string to proper Path
-        self.html_template = Path(self.config.html_template)
+        self.html_template = Path(
+            self.config.html_template or 'microsite/render/templates/markdown.html.j2'
+        )
 
         # Resolve any pathing complications like symlinks into "real" paths
         self.html_template = Path.resolve(self.html_template)
@@ -53,7 +55,10 @@ class MarkdownRenderEngine(RenderEngine):
                 'conflicts with a filename in the source content. '
                 'Specify an alternate stylesheet target name.'
             )
-        shutil.copy(self.config.stylesheet, f'{target_dir}/{self.config.stylesheet_target_name}')
+        shutil.copy(
+            self.config.stylesheet or 'microsite/render/styles/plain-white.css',
+            f'{target_dir}/{self.config.stylesheet_target_name}',
+        )
 
         rendered_paths = []
         for path in paths:

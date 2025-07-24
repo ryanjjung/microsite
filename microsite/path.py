@@ -57,7 +57,7 @@ def validate_dir(dir: str) -> bool:
     :rtype: bool
     """
 
-    source = Path(dir).resolve()
+    source = Path(dir).expanduser().resolve()
     if not source.exists():
         raise ValueError(f'Source directory {source} does not exist.')
     if not source.is_dir():
