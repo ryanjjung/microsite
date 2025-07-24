@@ -55,7 +55,10 @@ class MarkdownRenderEngine(RenderEngine):
                 'conflicts with a filename in the source content. '
                 'Specify an alternate stylesheet target name.'
             )
-        shutil.copy(self.config.stylesheet, f'{target_dir}/{self.config.stylesheet_target_name}')
+        shutil.copy(
+            self.config.stylesheet or 'microsite/render/styles/plain-white.css',
+            f'{target_dir}/{self.config.stylesheet_target_name}',
+        )
 
         rendered_paths = []
         for path in paths:
