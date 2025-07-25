@@ -58,8 +58,9 @@ cf_distro = aws.cloudfront.Distribution(
 )
 project.resources['cloudfront_distribution'] = cf_distro
 
-cf_distro.id.apply(lambda cf_distro_id:
-    boto3.cloudfront.create_invalidation(
+def invalidate_cache(cf_distro_id: str):
+    cloudfront = boto3.client('cloudfront')
+    cloudfront.create_invalidation(
         DistributionId=cf_distro_id,
         InvalidationBatch={
             'Paths': {
@@ -67,7 +68,7 @@ cf_distro.id.apply(lambda cf_distro_id:
             }
         }
     )
-)
+cf_distro.id.apply(lambda cf_distro_id: invalidate_cache(cf_distro_id))
 
 # Create a DNS record pointing to it
 cname = aws.route53.Record(

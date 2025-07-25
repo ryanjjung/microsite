@@ -22,7 +22,7 @@ dependencies = [
     "Jinja2>=3.1.6,<4.0",
     "Markdown>=3.8.2,<4.0",
     "python-magic>=0.4.27,<1.0",
-    "tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14",
+    "tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@bucket-paths",
     "toml>=0.10.2,<1.0",
 ]
 
