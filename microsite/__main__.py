@@ -142,7 +142,8 @@ def main() -> None:
 
         render_engines = [
             RENDER_ENGINE_CLASS_MAP[engine](
-                config=AttrDict(project.render.engine[engine]), index=project.render.index
+                config=AttrDict(project.render.engine[engine]),
+                index=project.render.index if project.render.index else {},
             )
             for engine in project.render.engines
         ]
