@@ -58,17 +58,25 @@ cf_distro = aws.cloudfront.Distribution(
 )
 project.resources['cloudfront_distribution'] = cf_distro
 
-def invalidate_cache(cf_distro_id: str):
+def invalidate_cache(cf_distro_id: str, paths: list[str]):
     cloudfront = boto3.client('cloudfront')
     cloudfront.create_invalidation(
         DistributionId=cf_distro_id,
         InvalidationBatch={
             'Paths': {
-                'Items': ["/*"]
+                'Quantity': len(paths),
+                'Items': paths
             }
-        }
+            'CallerReference': 'string',
+        },
     )
-cf_distro.id.apply(lambda cf_distro_id: invalidate_cache(cf_distro_id))
+s3_paths = website.resources.get('bucket').resources.get('s3_paths')
+pulumi.Output.all(cf_distro_id=cf_distro.id, paths=s3_paths).apply(
+    lambda outputs: invalidate_cache(
+        cf_distro_id=outputs['cf_distro_id'],
+        paths=outputs['paths']
+    )
+)
 
 # Create a DNS record pointing to it
 cname = aws.route53.Record(
