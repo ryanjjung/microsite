@@ -31,7 +31,7 @@ class RenderEngine(ABC, Engine):
         - ``title``: Used to override the ``<title>`` text for the page.
     """
 
-    def __init__(self, name: str, config: AttrDict, index: dict):
+    def __init__(self, name: str, config: AttrDict, index: dict = {}):
         super().__init__(name=name, config=config)
         self.index = index
         log.debug(f'Created rendering engine {name} with options: {config}')

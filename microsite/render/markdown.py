@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 class MarkdownRenderEngine(RenderEngine):
-    def __init__(self, config: AttrDict, index: dict):
+    def __init__(self, config: AttrDict, index: dict = {}):
         super().__init__(name='markdown', config=config, index=index)
 
         # Convert template path string to proper Path
