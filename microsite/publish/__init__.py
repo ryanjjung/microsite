@@ -78,9 +78,7 @@ class PulumiPublishEngine(PublishEngine):
 
         # Jinja environment for other functions to operate in
         _module_dir = '/'.join(__file__.split('/')[0:-1])
-        tpl_path_internal = Path(
-            f'{_module_dir}/static/pulumi/tb_pulumi/s3_website/templates'
-        ).expanduser().resolve()
+        tpl_path_internal = Path(f'{_module_dir}/static/pulumi/templates').expanduser().resolve()
         _j2_loader = jinja2.FileSystemLoader(searchpath=tpl_path_internal)
         self.pulumi_templates = jinja2.Environment(loader=_j2_loader)
 
