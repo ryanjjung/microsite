@@ -1,8 +1,11 @@
 import jinja2
+import logging
 
 from microsite.util import AttrDict
 from microsite.publish import TBPulumiPublishEngine
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 
 class TbPulumiS3Website(TBPulumiPublishEngine):
@@ -21,13 +24,14 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
             'pulumi_aws>=6.65.0,<7',
             'tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14',
         ]
-        template_dir = Path(
-            'microsite/publish/static/pulumi/tb_pulumi/s3_website/templates'
-        ).expanduser().resolve()
+        _module_dir = '/'.join(__file__.split('/')[0:-1])
+        tpl_path_internal = Path(
+            f'{_module_dir}/static/pulumi/tb_pulumi/s3_website/templates'
+        ).resolve()
 
         # Jinja environment for other functions to operate in
-        _j2_loader = jinja2.FileSystemLoader(searchpath=template_dir)
-        self.website_templates = jinja2.Environment(loader=_j2_loader)
+        _j2_loader = jinja2.FileSystemLoader(searchpath=tpl_path_internal)
+        self.microsite_templates = jinja2.Environment(loader=_j2_loader)
 
         # These variables adjust according to user input
         self.filename_config_stack_yaml = f'config.{self.config.pulumi_stack_name}.yaml'
@@ -40,7 +44,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         Constructs the ``config.$stack.yaml`` file required by tb_pulumi.
         """
 
-        template = self.website_templates.get_template('config.stack.yaml.j2')
+        template = self.microsite_templates.get_template('config.stack.yaml.j2')
         source_dir = str(Path(self.source_dir).expanduser().resolve())
         content = template.render(
             {
@@ -57,13 +61,15 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         Constructs the __main__.py file that defines the build pattern.
         """
 
-        template = self.website_templates.get_template('__main__.py.j2')
-        content = template.render({
-            'acm_certificate_arn': self.config.acm_certificate_arn,
-            'domain': self.config.domain,
-            'route53_zone_id': self.config.route53_zone_id,
-            'subdomain': self.config.subdomain,
-        })
+        template = self.microsite_templates.get_template('__main__.py.j2')
+        content = template.render(
+            {
+                'acm_certificate_arn': self.config.acm_certificate_arn,
+                'domain': self.config.domain,
+                'route53_zone_id': self.config.route53_zone_id,
+                'subdomain': self.config.subdomain,
+            }
+        )
 
         with self.file_main_py.open('w') as file:
             file.write(content)

@@ -4,7 +4,6 @@ Main entrypoint to the microsite command line utility.
 
 import logging
 import tomllib
-import sys
 
 from argparse import ArgumentParser
 from copy import deepcopy
@@ -66,7 +65,7 @@ def parse_args() -> None:
         action='store_true',
     )
     subparsers = parser.add_subparsers(help='Runmode for the tool', dest='runmode')
-    render_parser = subparsers.add_parser(
+    _render_parser = subparsers.add_parser(
         'render', help='Run in render mode to convert content into web content'
     )
     publish_parser = subparsers.add_parser(
