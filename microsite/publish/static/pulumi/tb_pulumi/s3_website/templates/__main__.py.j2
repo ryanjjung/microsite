@@ -58,7 +58,7 @@ cf_distro = aws.cloudfront.Distribution(
 )
 project.resources['cloudfront_distribution'] = cf_distro
 
-cf_distro.resources['cloudfront_distribution'].id.apply(lambda cf_distro_id:
+cf_distro.id.apply(lambda cf_distro_id:
     boto3.cloudfront.create_invalidation(
         DistributionId=cf_distro_id,
         InvalidationBatch={
