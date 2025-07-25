@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 
 
 class MarkdownRenderEngine(RenderEngine):
-    def __init__(self, config: AttrDict):
-        super().__init__(name='markdown', config=config)
+    def __init__(self, config: AttrDict, index: dict = {}):
+        super().__init__(name='markdown', config=config, index=index)
 
         # Convert template path string to proper Path
         self.html_template = Path(
@@ -142,7 +142,7 @@ class MarkdownRenderEngine(RenderEngine):
         relative_stylesheet = f'{dots}{self.config.stylesheet_target_name}'
 
         # Get the index config
-        index = AttrDict(self.config.index.get(source_file, {}))
+        index = AttrDict(self.index.get(source_file, {}))
         title = index.title if index.title else self.config.title
 
         page_html = j2_tpl.render(stylesheet=relative_stylesheet, title=title, html=md_html)

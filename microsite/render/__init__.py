@@ -21,13 +21,21 @@ class RenderEngine(ABC, Engine):
     :param name: The name of the rendering engine.
     :type name: str
 
-    :param config: A dict containing operating parameters for this rendering engines.
+    :param config: A dict containing operating parameters for this rendering engine.
     :type config: dict
+
+    :param index: Dict where the keys are paths to source files and the values are dicts with
+        the following optional settings:
+
+        - ``tags``: List of terms relevant to the content of the page.
+        - ``title``: Used to override the ``<title>`` text for the page.
     """
 
-    def __init__(self, name: str, config: AttrDict):
+    def __init__(self, name: str, config: AttrDict, index: dict = {}):
         super().__init__(name=name, config=config)
+        self.index = index
         log.debug(f'Created rendering engine {name} with options: {config}')
+        log.debug(f'Document index: {self.index}')
 
     @abstractclassmethod
     def render(self, source_dir: str, target_dir: str, paths: list[str]) -> list[str]:
@@ -43,9 +51,6 @@ class RenderEngine(ABC, Engine):
         :param paths: List of all paths in the source directory to be processed. Not every path in
             this list will be rendered.
         :type paths: list[str]
-
-        :return: List of paths this RenderEngine made alterations to.
-        :rtype: list[str]
         """
         pass
 
