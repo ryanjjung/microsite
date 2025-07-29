@@ -144,8 +144,11 @@ class MarkdownRenderEngine(RenderEngine):
         # Get the index config
         index = AttrDict(self.index.get(source_file, {}))
         title = index.title if index.title else self.config.title
+        additional_vars = {k: v for k, v in index.items() if k.startswith('md_')}
 
-        page_html = j2_tpl.render(stylesheet=relative_stylesheet, title=title, html=md_html)
+        page_html = j2_tpl.render(
+            stylesheet=relative_stylesheet, title=title, html=md_html, **additional_vars
+        )
 
         # Convert to a BS object so we can manipulate it before writing it back out
         page_html = BeautifulSoup(page_html, features='html.parser')
