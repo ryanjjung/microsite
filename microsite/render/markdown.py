@@ -143,9 +143,11 @@ class MarkdownRenderEngine(RenderEngine):
 
         # Get the index config
         index = AttrDict(self.index.get(source_file, {}))
-        title = index.title if index.title else self.config.title
+        title = index.pop('title') if 'title' in index else self.config.title
 
-        page_html = j2_tpl.render(stylesheet=relative_stylesheet, title=title, html=md_html)
+        page_html = j2_tpl.render(
+            stylesheet=relative_stylesheet, title=title, html=md_html, **index
+        )
 
         # Convert to a BS object so we can manipulate it before writing it back out
         page_html = BeautifulSoup(page_html, features='html.parser')
