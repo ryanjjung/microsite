@@ -22,7 +22,7 @@ class TbPulumiS3Website(TBPulumiPublishEngine):
         # adjustable by the end user.
         self.python_dependencies = [
             'pulumi_aws>=6.65.0,<7',
-            'tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.14',
+            'tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.15',
         ]
         _module_dir = '/'.join(__file__.split('/')[0:-1])
         tpl_path_internal = Path(
