@@ -1,6 +1,6 @@
 [render]
 source = "sample-site/"
-target = ".render"
+target = ".render/"
 delete_target_dir = true
 engines = ["markdown"]
 
