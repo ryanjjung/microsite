@@ -1,6 +1,6 @@
 [render]
 source = "sample-site/"
-target = "sample-output/"
+target = ".render/"
 delete_target_dir = true
 engines = ["markdown"]
 
@@ -21,7 +21,7 @@ title = "Microsite Sample Site Page 2"
 title = "Microsite Sample Site Subdirectory Example"
 
 [publish]
-source = "sample-output/"
+source = ".render/"
 
 [publish.targets.s3website-prod]
 engine = "tbp_s3website"
@@ -35,7 +35,7 @@ pulumi_log = "pulumi.log"
 pulumi_error_log = "pulumi.err"
 pulumi_stack_name = "prod"
 pulumi_state_s3_bucket = "microsite-sample-site-pulumi"
-pulumi_work_dir = ".tbpulumi"
+pulumi_work_dir = ".pulumi"
 persist_work_dir = true
 publish_bucket = "microsite-sample-site"
 index_document = "index.html"
